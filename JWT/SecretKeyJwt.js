@@ -1,0 +1,1 @@
+module.exports = 'Secret Key for JWT'
