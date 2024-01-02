@@ -9,7 +9,7 @@ const LoginMiddleware = {
     ValidationResult : (req,res,next)=> {
         const result = validationResult(req);
             if (!result.isEmpty()) {
-                return res.json({[result.errors[0]['msg']]: result.errors[0]['path']});
+                return res.json({[result.errors[0].msg]: result.errors[0].path});
              }
              next()
 
