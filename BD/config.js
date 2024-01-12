@@ -1,8 +1,9 @@
 module.exports = {
     "Config_Test" : {
-        host : '127.0.0.1',
+        host : 'localhost',
+        port: 3306,
         user : 'root',
-        password : 'root',
+        password : 'password',
         database : 'test'
     }
 }
