@@ -26,10 +26,10 @@ const createAuto = async (req,res)=>{
 //удаление авто с таблицы cars доступно только админу 
 const DeleteAuot = async (req,res)=>{
     try {
-        if (!req.body.Number) {
+        if (!req.query.Number) {
             return res.status(400).json({message:'enter the machine number'}).end();
         }
-        const result = await DeleteAutoBD(req.body.Number);
+        const result = await DeleteAutoBD(req.query.Number);
         return res.status(200).json({ message: 'Car was deleted' }).end();
 
     } catch (error) {
@@ -51,7 +51,7 @@ const FilterCars = async(req,res)=>{
     try {
         const { brand, model, price, year } = req.query;
         if (!brand && !model && !price && !year) {
-            throw new Error('введи какие то данные')
+            throw new Error('Enter some data')
         }
         let query = 'SELECT * FROM cars WHERE 1 = 1'; // Начальный SQL-запрос
         const params = [];
@@ -73,13 +73,13 @@ const FilterCars = async(req,res)=>{
           }
         query+= ' AND is_deleted  = 0 AND in_renting  = 0'
         const result = await FilterCarsBD(query,params);
-        if (!result.length === 0) {
-            return res.status(404).json({message:'нет таких авто'})
+        if (result.length === 0) {
+            return res.status(200).json({message:'no such cars'})
         }
         return res.status(200).json({auto:result})
 
     } catch (error) {
-        return res.status(400).json(error.message)
+        return res.status(400).json({error:error.message})
     }
 
 }
@@ -89,22 +89,26 @@ const GetAllCars = async(req,res)=>{
         const result =  await GetAllCarsBd();
         return res.status(200).json(result)
     } catch (error) {
-        return res.status(400).json(error.message)
+        return res.status(500).json(error.message)
     }
 
 }
 // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
 const includeLetters = async(req,res)=>{
     try {
+        const { brand, model} = req.query;
+        if (!brand && !model) {
+            throw new Error('Enter some data')
+        }
         let queryInclude = "SELECT * FROM cars WHERE 1 = 1 ";
         let params = [];
-        if (req.query.brand) {
+        if (brand) {
             queryInclude+="AND  brand LIKE ? ";
-            params.push(`%${req.query.brand}%`)
+            params.push(`%${brand}%`)
         }
         if (req.query.model) {
             queryInclude+="OR  model LIKE ? ";
-            params.push(`%${req.query.model}%`);
+            params.push(`%${model}%`);
         }
         queryInclude+= ' AND is_deleted  = 0 AND in_renting  = 0'
         const result = await IncludeLettersBd(queryInclude,params)
@@ -119,7 +123,7 @@ const rent = async(req,res)=>{
     const {email} = req.payload
     try {
         if (!startTime || !endTime || !number) {
-            return res.status(400).json('enter the data')
+            return res.status(400).json({message:'enter the data'})
         }
         const resultRentCar = await RentCar(number,email);
         
@@ -129,7 +133,7 @@ const rent = async(req,res)=>{
         const resultInsertRent = await InsertNewRent(data);
         return res.status(200).json("you rented").end()
     } catch (error) {
-        return res.status(500).json({ message: error.message }); 
+        return res.status(400).json({ error: error.message }); 
     }
 
 
@@ -138,10 +142,10 @@ const rent = async(req,res)=>{
 const returnCar = async(req,res)=>{
     try {
      if (!req.body.number || !req.body.endTime) {
-         return res.status(400).json("enter the data")
+         return res.status(400).json({error:"enter the data"})
      }
          const result = await returnCarBd(req.body.number,req.body.endTime);
-         return res.status(200).json('car has returned');
+         return res.status(200).json({error:'The car has been returned'});
     } catch (error) {
          return res.status(400).json({message:error.message})
     }

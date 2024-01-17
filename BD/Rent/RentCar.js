@@ -32,7 +32,7 @@ async function RentCar(number,email) {
        
     } catch (error) {
         await connectionTest.rollback();
-        throw new Error(`Failed to rent car: ${error.message}`);
+        throw new Error( error.message);
     }finally{
         await connectionTest.end();
     }

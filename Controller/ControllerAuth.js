@@ -17,7 +17,7 @@ const signUp = async (req,res)=>{
             const newUser = new Users (name,lastName,email);
             const HashResult = await HashingPasswor(password);
             const insert = await InsertUser(newUser.name,newUser.lastName,newUser.email,HashResult,newUser.role);
-            return res.status(201).json({you:'created'}).end()
+            return res.status(201).json({you:'was created'}).end()
         } catch (error) {
             return res.status(400).json(error)
         }
@@ -38,7 +38,7 @@ const login = async (req,res)=>{
         
 
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.status(500).json({ error: error.message });
     };
 
 }
@@ -53,18 +53,18 @@ const createAdmin = async (req,res)=>{
         const InsertAdmin = await InsertUser(name,lastName,email,hash,NewAdmin.role);
         return res.status(201).json({message:NewAdmin}).end()
     } catch (error) {
-        return res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error });
     }
 }
 
 //Видалення користувачів (Soft Delete) - адмін
 const deletedUser = async (req,res)=>{
    try {
-    if (!req.body.email) {
+    if (!req.query.email) {
         throw new Error('Enter the data');
     }
-    const result = await DeleteUserBD(req.body.email)
-    return res.status(200).json({[req.body.email]:'was deleted'})
+    const result = await DeleteUserBD(req.query.email)
+    return res.status(200).json({[req.query.email]:'was deleted'})
    } catch (error) {
     return res.status(400).json(error.message).end()
    }
