@@ -1,8 +1,8 @@
 const mysql = require('mysql2/promise');
-const{Config_Test} = require('./config');
+const {development} = require('../knexfile');
 
 async function IncludeLettersBd(query,params) {
-    const connectionTest = await mysql.createConnection(Config_Test);
+    const connectionTest = await mysql.createConnection(development.connection);
     try {
         const [result] = await connectionTest.execute(query,params);
         if (result.length === 0) {

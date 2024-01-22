@@ -7,7 +7,7 @@ exports.up = function(knex) {
     table.increments('id');
     table.integer('user_id').unsigned().notNullable();
     table.string('password_hash').notNullable();
-    table.foreign('user_id').references('id_users').inTable('users');
+    table.foreign('user_id').references('id').inTable('users');
   })
 };
 

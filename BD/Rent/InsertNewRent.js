@@ -1,9 +1,10 @@
 const mysql = require('mysql2/promise');
-const {Config_Test} = require('../config');
+const {development} = require('../../knexfile');
+
 
 
 async function InsertNewRent(data) {
-    const connectionTest = await mysql.createConnection(Config_Test);
+    const connectionTest = await mysql.createConnection(development.connection);
     try {
         await connectionTest.beginTransaction(); // Начало транзакции
         const queryInsert = 'INSERT INTO rentals (user_email,car_number, start_date, end_date) VALUES (?, ?, ?, ?)';

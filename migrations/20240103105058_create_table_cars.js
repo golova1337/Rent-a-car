@@ -3,13 +3,13 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-  return knex.schema.createTable('Cars',(table)=>{
-    table.increments('id_car').unsigned();
-    table.string('Brand',20).notNullable();
-    table.string('Model',20).notNullable();
-    table.specificType('Year', 'smallint(4)').notNullable().unsigned();
-    table.string('Number',20).unique().notNullable();
-    table.integer('Price').notNullable().unsigned();
+  return knex.schema.createTable('cars',(table)=>{
+    table.increments('id').unsigned();
+    table.string('brand',20).notNullable();
+    table.string('model',20).notNullable();
+    table.specificType('year', 'smallint(4)').notNullable().unsigned();
+    table.string('number_plate',20).unique().notNullable();
+    table.integer('price').notNullable().unsigned();
     table.boolean('in_renting').defaultTo(false);
     table.boolean('is_deleted').defaultTo(false);
   })
