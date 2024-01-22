@@ -4,11 +4,14 @@
  */
 exports.up = function(knex) {
   return knex.schema.createTable('archive_lease',(table)=>{
-    table.increments('rental_id').unsigned();
-    table.string('email').notNullable();
-    table.string('car_number',20).notNullable();
+    table.increments('id').unsigned();
+    table.integer('user_id').unique().unsigned().notNullable();
+    table.string('number_plate',20).notNullable();
     table.dateTime('start_date');
     table.dateTime('end_date');
+    table.foreign('user_id').references('id').inTable('users');
+    table.foreign('number_plate').references('number_plate').inTable('cars');
+
   })
 };
 

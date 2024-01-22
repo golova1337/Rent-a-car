@@ -1,8 +1,8 @@
 const mysql = require('mysql2/promise');
-const {Config_Test} = require('./config');
+const {development} = require('../knexfile');
 
 async function RentalCarsBD() {
-    const connectionTest = await mysql.createConnection(Config_Test);
+    const connectionTest = await mysql.createConnection(development.connection);
     try {
         const query = 'SELECT * FROM `Cars` WHERE  in_renting = 1'
         const [rows, fields] = await connectionTest.execute(query);

@@ -6,8 +6,8 @@ exports.up = function(knex) {
   return knex.schema.createTable('user_passwords',(table)=>{
     table.increments('id');
     table.integer('user_id').unsigned().notNullable();
-    table.string('password').notNullable();
-    table.foreign('user_id').references('id_users').inTable('users');
+    table.string('password_hash').notNullable();
+    table.foreign('user_id').references('id').inTable('users');
   })
 };
 

@@ -3,14 +3,15 @@
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
-module.exports = {
+module.exports  = {
 
   development: {
     client: 'mysql2',
     connection: {
       host: 'localhost', 
+      port:3306,
       user: 'root', 
-      password: 'password', 
+      password: 'root', 
       database: 'test' 
     },
     migrations: {
@@ -19,3 +20,4 @@ module.exports = {
     }
   }
 }
+

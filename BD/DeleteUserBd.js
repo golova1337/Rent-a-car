@@ -1,12 +1,12 @@
 const mysql = require('mysql2/promise');
-const {Config_Test} = require('./config')
+const {development} = require('../knexfile');
 
 
-async function DeleteUserBD(email) {
-    const connectionTest = await mysql.createConnection(Config_Test);
+async function DeleteAutoBD(number) {
+    const connectionTest = await mysql.createConnection(development.connection);
     try {
-        const query = `UPDATE users SET is_deleted = TRUE WHERE email = ?`
-        const result = await connectionTest.execute(query,[email]);
+        const query = `UPDATE Cars SET is_deleted = TRUE WHERE number = ?`
+        const result = await connectionTest.execute(query,[number]);
         return result;
     } catch (error) {
         throw new Error('Failed to delete car');
@@ -16,13 +16,6 @@ async function DeleteUserBD(email) {
 }
 
 
-
-
-
-
-
-
-
 module.exports = {
-    "DeleteUserBD":DeleteUserBD
+    'DeleteAutoBD':DeleteAutoBD
 }
