@@ -1,9 +1,9 @@
 const mysql = require('mysql2/promise');
-const {Config_Test} = require('../config');
+const {development} = require('../../knexfile');
 
 
 async function RentCar(number,email) {
-    const connectionTest = await mysql.createConnection(Config_Test);
+    const connectionTest = await mysql.createConnection(development.connection);
     try {
        await  connectionTest.beginTransaction();
 
@@ -32,7 +32,7 @@ async function RentCar(number,email) {
        
     } catch (error) {
         await connectionTest.rollback();
-        throw new Error(`Failed to rent car: ${error.message}`);
+        throw new Error( error.message);
     }finally{
         await connectionTest.end();
     }

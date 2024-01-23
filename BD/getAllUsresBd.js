@@ -1,9 +1,9 @@
 const mysql = require('mysql2/promise');
-const {Config_Test} = require('./config');
+const {development} = require('../knexfile');
 
 
 async function getAllUsersBd(params) {
-    const connectionTest = await mysql.createConnection(Config_Test);
+    const connectionTest = await mysql.createConnection(development.connection);
     try {
         const query = 'SELECT * FROM users WHERE is_deleted = 0 AND role = "user" ';
         const [rows] = await connectionTest.execute(query);

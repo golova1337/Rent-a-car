@@ -1,8 +1,8 @@
 const mysql = require('mysql2/promise');
-const {Config_Test} = require('./config');
+const {development} = require('../knexfile');
 
 async function FilterCarsBD(query,params) {
-    const connectionTest = await mysql.createConnection(Config_Test);
+    const connectionTest = await mysql.createConnection(development.connection);
     try {
         const [rows, fields] = await connectionTest.execute(query,params);
         const newArray = rows.map(({Brand,Model,Year,Price})=>({Brand,Model,Year,Price}))
