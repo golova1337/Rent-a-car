@@ -5,7 +5,7 @@ const {development} = require('../knexfile');
 async function InsertNewAutoBD(Brand,Model,Number,Price,Year) {
     const connectionTest = await mysql.createConnection(development.connection);
     try {
-        const query = 'Insert INTO Cars (Brand,Model,Number,Year,Price) VALUES (?,?,?,?,?)';
+        const query = 'Insert INTO Cars (brand,model,number_plate,year,price) VALUES (?,?,?,?,?)';
         const [result] = await connectionTest.execute(query,[Brand,Model,Number,Year,Price]);
         return result;
     } catch (error) {

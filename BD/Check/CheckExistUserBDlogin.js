@@ -14,7 +14,8 @@ async function CheckExistUserBDlogin(email) {
             throw new Error('you can not log up')
         }
         //
-        const [rowsPassword, fieldsPassword] = await connectionTest.execute('SELECT * FROM user_passwords WHERE user_id = ?', [rowsUser[0].id_users]);
+        const [rowsPassword, fieldsPassword] = await connectionTest.execute('SELECT * FROM user_passwords WHERE user_id = ?', [rowsUser[0].id]);
+        console.log(rowsPassword);
         if (rowsPassword.length === 0) {
             throw new Error('Password could not be found'); // Пароль для цього користувача не знайдено
         };

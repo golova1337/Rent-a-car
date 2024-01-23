@@ -1,5 +1,7 @@
 const express  = require('express');
-const expressOasGenerator = require('express-oas-generator');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require("swagger-ui-express");
+const options = require('./api/api-doc')
 const app = express();
 const router = require('./routerAutho/RouterSignUp');
 const car = require('./routerCar/routerCar');
@@ -10,12 +12,13 @@ app.use(express.json())
 
 
 
-expressOasGenerator.init(app, {});
-
 
 app.use('/',router)
 app.use('/car',car)
 
 
+//Swagger
+const swaggerSpec = swaggerJsdoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.listen(Port, ()=> console.log(`Port,BD works`))      
