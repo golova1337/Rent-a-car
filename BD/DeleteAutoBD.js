@@ -5,7 +5,7 @@ const {development} = require('../knexfile');
 async function DeleteAutoBD(number) {
     const connectionTest = await mysql.createConnection(development.connection);
     try {
-        const query = `UPDATE Cars SET is_deleted = TRUE WHERE number = ?`
+        const query = `UPDATE Cars SET is_deleted = TRUE WHERE number_plate = ?`
         const result = await connectionTest.execute(query,[number]);
         return result;
     } catch (error) {

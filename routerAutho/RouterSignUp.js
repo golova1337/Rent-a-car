@@ -9,7 +9,6 @@ const{checkJWT,checkJWTadmin,checkJWTSuperadmin} = require('../JWT/CheckJWT');
 
 
 
-
 router.post('/signUp',RegistrationMiddleware.ValidtoBodySingUP,RegistrationMiddleware.ValidationResult,signUp);
 
 router.post('/login',LoginMiddleware.ValidtoBodyLogin,LoginMiddleware.ValidationResult,login);

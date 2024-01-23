@@ -2,7 +2,7 @@ const mysql = require('mysql2/promise');
 const {development} = require('../knexfile');
 
 
-async function DeleteAutoBD(number) {
+async function DeleteUserBD(email) {
     const connectionTest = await mysql.createConnection(development.connection);
     try {
         const query = `UPDATE Cars SET is_deleted = TRUE WHERE number = ?`
