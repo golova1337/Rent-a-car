@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const Secret_Key = require('./SecretKeyJwt');
+const Secret_Key = require('./secretKeyJwt');
 
 
 async function VerifyJWT(token) {

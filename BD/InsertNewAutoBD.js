@@ -1,20 +1,20 @@
-const mysql = require('mysql2/promise');
-const {development} = require('../knexfile');
 
 
-async function InsertNewAutoBD(Brand,Model,Number,Price,Year) {
-    const connectionTest = await mysql.createConnection(development.connection);
+async function InsertNewAutoBD(knex,brand,model,number_plate,price,year) {
     try {
-        const query = 'Insert INTO Cars (brand,model,number_plate,year,price) VALUES (?,?,?,?,?)';
-        const [result] = await connectionTest.execute(query,[Brand,Model,Number,Year,Price]);
-        return result;
+        const resultInsertBody = await knex('cars').insert({
+            'brand': brand,
+            'model':model,
+            'year':year,
+            'number_plate': number_plate,
+            'price':price
+          });
+        return;
     } catch (error) {
-        throw new Error (error)
-    }finally{
-        await connectionTest.end()
+        throw  (error)
     }
 }
 
 module.exports = {
-    "InsertNewAutoBD":InsertNewAutoBD
+    InsertNewAutoBD
 }

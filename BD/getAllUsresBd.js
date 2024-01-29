@@ -1,20 +1,20 @@
-const mysql = require('mysql2/promise');
-const {development} = require('../knexfile');
 
 
-async function getAllUsersBd(params) {
-    const connectionTest = await mysql.createConnection(development.connection);
-    try {
-        const query = 'SELECT * FROM users WHERE is_deleted = 0 AND role = "user" ';
-        const [rows] = await connectionTest.execute(query);
-        return rows;
-    } catch (error) {
-        throw error
-    }finally{
-        await connectionTest.end();
-    }
+async function getAllUsersBd(knex,role) {
+        try {
+            const getAllUsers = await knex.select('name','last_name','email')
+                                            .from('users')
+                                            .where({
+                                                'role':role,
+                                                'is_deleted':false
+                                            });
+            return getAllUsers
+        } catch (error) {
+            throw new Error (error)
+        }
+
 }
 
 module.exports = {
-    "getAllUsersBd":getAllUsersBd
+    getAllUsersBd
 }

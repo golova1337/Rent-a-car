@@ -1,10 +1,10 @@
 const express  = require('express');
 const router = express.Router();
-const {signUp,login,createAdmin,deletedUser,getAllUsers} = require('../Controller/ControllerAuth')
+const {signUp,login,createAdmin,deletedUser,getAllUsers} = require('../controller/controllerAuth')
 const {RegistrationMiddleware} = require('../Middleware/validatorBodySignUp');
 const {LoginMiddleware} = require('../Middleware/validatorBodyLogin');
 const {CreateAdminMiddleware} = require('../Middleware/validatorBodyCreateAdmin');
-const{checkJWT,checkJWTadmin,checkJWTSuperadmin} = require('../JWT/CheckJWT');
+const{checkJWT,checkJWTadmin,checkJWTSuperadmin} = require('../jwt/checkJWT');
 
 
 

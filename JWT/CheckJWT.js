@@ -1,4 +1,4 @@
-const {VerifyJWT} = require('./VerifyJWT');
+const {VerifyJWT} = require('./verifyJWT');
 
 
 
@@ -38,11 +38,11 @@ const checkJWTadmin = async(req,res,next)=>{
     try {
         const token = req.headers['authorization'];
         if (!token) {
-            return res.status(403).json({ message: 'Отсутствует токен доступа' });
+            return res.status(403).json({ message: 'There is no token' });
         }
         const result = await VerifyJWT(token);
         if (result.role !== 'admin') {
-            return res.status(401).json({ message: 'ты не админ' }).end();
+            return res.status(401).json({ message: 'verification was unsuccessful' }).end();
         }
         next()
     } catch (error) {
@@ -53,7 +53,7 @@ const checkJWTadmin = async(req,res,next)=>{
 }
 
 module.exports ={
-    "checkJWT" : checkJWT,
-    "checkJWTSuperadmin":checkJWTSuperadmin,
-    "checkJWTadmin":checkJWTadmin
+    checkJWT,
+    checkJWTSuperadmin,
+    checkJWTadmin
 }

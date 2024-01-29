@@ -1,8 +1,8 @@
 const express = require('express');
 const car  =  express.Router(); //имя роутера
-const {checkJWTadmin,checkJWT} = require('../JWT/CheckJWT'); // проверка что jwt админа или просто то что jwt верный
+const {checkJWTadmin,checkJWT} = require('../jwt/checkJWT'); // проверка что jwt админа или просто то что jwt верный
 const {ValidtoBody} = require('../Middleware/validatorBodyCreateAuto'); //проверка данных боди для создания авто 
-const {createAuto,DeleteAuot,FilterCars,includeLetters,GetAllCars,RentalCars,returnCar,rent,getAllUsers} = require('../Controller/ControllerAuto');//контролерры 
+const {createAuto,DeleteAuot,FilterCars,includeLetters,GetAllCars,RentalCars,returnCar,rent,getAllUsers} = require('../controller/controllerAuto');//контролерры 
 
 
 //Створення автівок - тільки адміном

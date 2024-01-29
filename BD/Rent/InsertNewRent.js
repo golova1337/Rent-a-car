@@ -1,25 +1,38 @@
-const mysql = require('mysql2/promise');
-const {development} = require('../../knexfile');
-
-
-
-async function InsertNewRent(data) {
-    const connectionTest = await mysql.createConnection(development.connection);
+async function InsertNewRent(knex,data) {
+    const trx = await knex.transaction();
     try {
-        await connectionTest.beginTransaction(); // Начало транзакции
-        const queryInsert = 'INSERT INTO rentals (user_email,car_number, start_date, end_date) VALUES (?, ?, ?, ?)';
-        const resultInsert = await connectionTest.execute(queryInsert,data);
-
-        const queryInRenting = 'UPDATE cars SET in_renting = true WHERE number = ?';
-        const resultInRenting = await connectionTest.execute(queryInRenting,[data[1]]);
-        await connectionTest.commit();
+        //Get the car
+        const getCar = await trx('cars')
+                                .first('number_plate')
+                                .where({
+                                    'brand':data.brand,
+                                    'model':data.model,
+                                    'year' : data.year,
+                                    'in_renting':false,
+                                    'is_deleted':false
+                                });
+        //Insert data into "rentals_currently";
+        const result = await trx('rentals_currently')
+                                .insert({
+                                    'user_id':data.user_id,
+                                    'number_plate':getCar.number_plate,
+                                    'start_date':data.startTime,
+                                    'end_date':data.endTime
+                                });
+        //Update 'in_renting' in Cars;
+        const updateCars = await trx('cars')
+                                    .where({'number_plate':getCar.number_plate})
+                                    .update({'in_renting':true});
+        
+        await trx.commit();
+        return;
         return;
     } catch (error) {
-        await connectionTest.rollback(); // Откат транзакции при ошибке
-        throw new Error('Failed to rent car')
+        await trx.rollback();
+        throw error;
     }
 }
 
 module.exports = {
-    "InsertNewRent":InsertNewRent
+    InsertNewRent
 }

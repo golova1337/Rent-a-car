@@ -3,11 +3,11 @@ const {body,validationResult} = require('express-validator');
 
 const ValidtoBody = {
      CreateAuto : [
-        body("Brand").trim().notEmpty().isLength({ min: 2, max: 20 }),
-        body("Model").trim().notEmpty().isLength({ min: 2, max: 20 }),
-        body("Number").trim().notEmpty().isLength({ min: 2, max: 20 }),
-        body("Price").trim().notEmpty().custom(value=>!isNaN(value) ? true :false),
-        body("Year").trim().notEmpty().isLength({ min: 4, max: 4 }).custom(value=>!isNaN(value) ? true :false)
+        body("brand").trim().notEmpty().isLength({ min: 2, max: 20 }),
+        body("model").trim().notEmpty().isLength({ min: 2, max: 20 }),
+        body("number_plate").trim().notEmpty().isLength({ min: 2, max: 20 }),
+        body("price").trim().notEmpty().custom(value=>!isNaN(value) ? true :false),
+        body("year").trim().notEmpty().isLength({ min: 4, max: 4 }).custom(value=>!isNaN(value) ? true :false)
     ],
     ValidationResult : (req,res,next)=> {
         const result = validationResult(req);

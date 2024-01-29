@@ -1,11 +1,12 @@
-const {CheckExistUserBDlogin} = require('../BD/Check/CheckExistUserBDlogin');
-const {CheckExistUserBDsignUp} = require('../BD/Check/CheckExistUserBDsignUp')
-const {InsertUser} = require('../BD/InsertNewUser')
+const {knex} = require('../bd/createConnection');
+const {CheckExistUserBDlogin} = require('../bd/check/checkExistUserBDlogin');
+const {CheckExistUserBDsignUp} = require('../bd/check/checkExistUserBDsignUp')
+const {InsertNewUser} = require('../BD/InsertNewUser')
 const { Users, Admin, SuperAdmin } = require('../ClassUsers/SuperClass')
-const {HashingPasswor} = require('../Bcrypt/HashingPassword')
+const {HashingPassword} = require('../Bcrypt/HashingPassword')
 const {ComparePassword} = require('../Bcrypt/ComparePassword');
-const {CreateJWT} = require('../JWT/CreateJWB');
-const {DeleteUserBD} = require('../BD/DeleteUserBd');
+const {CreateJWT} = require('../jwt/createJWB');
+const {DeleteUserBD} = require('../bd/deleteUserBd');
 const {getAllUsersBd} = require('../BD/getAllUsresBd')
 /**
  * @swagger
@@ -27,9 +28,9 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *         type: string
  *
  *     DeleteCar:
- *       name: Number
+ *       name: Number_plate
  *       in: query
- *       description: "car's number"
+ *       description: number_plate
  *       required: true
  *       schema:
  *         type: string
@@ -37,28 +38,28 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *     FilterCarBrand:
  *       in: query
  *       name: brand
- *       description: Бренд автомобиля
+ *       description: Brand car 
  *       schema:
  *         type: string
  *
  *     FilterCarbrandModel:
  *       in: query
  *       name: model
- *       description: Модель автомобиля
+ *       description: model car
  *       schema:
  *         type: string
  *
  *     FilterCarbrandYear:
  *       in: query
  *       name: year
- *       description: Год выпуска автомобиля
+ *       description: year of a car
  *       schema:
  *         type: integer
  *
- *     FilterCarbrandCoulor:
+ *     FilterCarbrandPrice:
  *       in: query
- *       name: color
- *       description: Цвет автомобиля
+ *       name: price
+ *       description: price of a car
  *       schema:
  *         type: string
  *
@@ -114,9 +115,6 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *     GetALLUsers:
  *       type: object
  *       properties:
- *         id_users:
- *           type: integer
- *           description: "User ID"
  *         name:
  *           type: string
  *           description: "User's first name"
@@ -127,21 +125,12 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *           type: string
  *           format: email
  *           description: "User's email address"
- *         role:
- *           type: string
- *           description: "User's role"
- *         is_deleted:
- *           type: integer
- *           description: "Indicator if the user is deleted or not"
  *       example:
- *         id_users: 2
  *         name: "Kseniya"
  *         lastName: "Kaplya"
  *         email: "kseniyaKaplya@gmail.com"
- *         role: "user"
- *         is_deleted: 0
  *
- *     RequestObjectCreateAuto:
+ *     FilterAuto:
  *       type: object
  *       properties:
  *         Brand:
@@ -154,11 +143,6 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *           maxLength: 20
  *           minLength: 2
  *           example: "m5"
- *         Number:
- *           type: string
- *           maxLength: 20
- *           minLength: 2
- *           example: AX1337
  *         Price:
  *           type: integer
  *           maxLength: 5
@@ -169,7 +153,16 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *           maxLength: 4
  *           minLength: 4
  *           example: 2020
- *
+ *     RequestObjectCreateAuto:
+ *       allOf:
+ *         - $ref: "#/components/schemas/FilterAuto"
+ *         - type: object
+ *           properties:
+ *             Number:
+ *              type: string
+ *              maxLength: 20
+ *              minLength: 2
+ *              example: AX1337
  *     ResponseObjectCreateAuto:
  *       type: object
  *       properties:
@@ -224,14 +217,13 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
 const signUp = async (req,res)=>{
         try {
             const {name,lastName,email,password} = req.body;
-            const resExist = await CheckExistUserBDsignUp(email);
-
+            await CheckExistUserBDsignUp(knex,email);
             const newUser = new Users (name,lastName,email);
-            const HashResult = await HashingPasswor(password);
-            const insert = await InsertUser(newUser.name,newUser.lastName,newUser.email,HashResult,newUser.role);
+            const HashResult = await HashingPassword(password);
+            await InsertNewUser(knex,newUser.name,newUser.lastName,newUser.email,HashResult,newUser.role);
             return res.status(201).json({you:'was created'}).end()
         } catch (error) {
-            return res.status(400).json(error)
+            return res.status(400).json(error.message)
         }
 }
 
@@ -269,7 +261,7 @@ const signUp = async (req,res)=>{
  *           application/json:
  *             example:
  *               message: "You logged on into the account. JWT received."
- *       '400':
+ *       '401':
  *         description: Bad Request, invalid data or email is wrong.
  *         content:
  *           application/json:
@@ -287,13 +279,12 @@ const signUp = async (req,res)=>{
 const login = async (req,res)=>{
     try {
         const {email,password} = req.body;
-        const {emailUser,roleUser,passwordUser} = await CheckExistUserBDlogin(email);
+        const {role,password_hash} = await CheckExistUserBDlogin(knex,email);
 
-        const resultComparePassword = await ComparePassword(password,passwordUser);
-        if (!resultComparePassword) {
-            return res.status(400).json('Password is wrong').end()
-        }
-        const token = await CreateJWT(emailUser,roleUser)
+        const resultComparePassword = await ComparePassword(password,password_hash);
+        if (!resultComparePassword) res.status(401).json('Password is wrong').end()
+        
+        const token = await CreateJWT(email,role)
         return res.status(200).json({'You logged on into the  account':token}).end()
         
 
@@ -350,13 +341,13 @@ const login = async (req,res)=>{
 const createAdmin = async (req,res)=>{
     const {name,lastName,email,password} = req.body;
     try {
-        const result = await CheckExistUserBDsignUp(email);
-        const hash = await HashingPasswor(password);
+         await CheckExistUserBDsignUp(knex,email);
+        const hash = await HashingPassword(password);
         const NewAdmin = SuperAdmin.CreateAdmin(name,lastName,email,hash);
-        const InsertAdmin = await InsertUser(name,lastName,email,hash,NewAdmin.role);
+         await InsertNewUser(knex,name,lastName,email,hash,NewAdmin.role);
         return res.status(201).json({message:NewAdmin}).end()
     } catch (error) {
-        return res.status(500).json({ message: error });
+        return res.status(500).json({ message: error.message });
     }
 }
 
@@ -389,17 +380,24 @@ const createAdmin = async (req,res)=>{
  *           application/json:
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
+ *       '500':
+ *         description: Verification was unsuccessful
+ *         content:
+ *           application/json:
+ *             examples:
+ *               example1:
+ *                 summary: Invalid data
+ *                 value:
+ *                   ReferenceError: email is not defined
  */
 //Видалення користувачів (Soft Delete) - адмін
 const deletedUser = async (req,res)=>{
    try {
-    if (!req.query.email) {
-        throw new Error('Enter the data');
-    }
-    const result = await DeleteUserBD(req.query.email)
+    if (!req.query.email) throw new Error('Enter the data');
+    await DeleteUserBD(knex,req.query.email)
     return res.status(200).json({[req.query.email]:'was deleted'})
    } catch (error) {
-    return res.status(400).json(error.message).end()
+    return res.status(500).json(error.message).end()
    }
 }
 
@@ -412,9 +410,14 @@ const deletedUser = async (req,res)=>{
  *       - user
  *     security:
  *       - JWT: []
+ *     parameters:
+ *       - name: role
+ *         in: query
+ *         description: "user's role"
+ *         required: true
  *     responses:
  *       '200':
- *         description: "Admin get all users"
+ *         description: "Admin get all users (employees)"
  *         content:
  *           application/json:
  *             schema:
@@ -425,21 +428,33 @@ const deletedUser = async (req,res)=>{
  *           application/json:
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
+ *       '400':
+ *         description: "Enter the date"
+ *         content:
+ *           application/json:
+ *             examples:
+ *               example1:
+ *                 summary: "You did not enter the date"
+ *                 value:
+ *                   "error": "enter the role"
  */
-// Можливість бачити всіх користувачів - адмін
+
+
+// Можливість бачити всіх користувачівб додав вибор по роли щоб можно було і працівників отримувати - адмін
 const getAllUsers = async(req,res)=>{
     try {
-        const result = await getAllUsersBd();
-        return res.status(200).json(result).end()
+        if (!req.query.role) res.status(400).json({error:'enter the role'})
+        const result = await getAllUsersBd(knex,req.query.role);
+        return res.status(200).json({list:result}).end()
     } catch (error) {
-        return res.status(400).json(error.message)
+        return res.status(500).json(error.message)
     }
 }
 
 module.exports = {
-    "signUp" : signUp,
-    "login":login,
-    "createAdmin":createAdmin,
-    "deletedUser":deletedUser,
-    "getAllUsers":getAllUsers
+    signUp,
+    login,
+    createAdmin,
+    deletedUser,
+    getAllUsers
 }

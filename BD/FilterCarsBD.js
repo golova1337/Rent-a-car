@@ -1,19 +1,20 @@
-const mysql = require('mysql2/promise');
-const {development} = require('../knexfile');
+async function FilterCarsBD(knex,params) {
+        try {
+            for (const key in params) {
+                if (params[key].trim().length === 0) {
+                    delete params[key];
+                }
+            }
+            const rows = await knex('cars')
+                                .select('brand','model','year','price')
+                                .where(params);
 
-async function FilterCarsBD(query,params) {
-    const connectionTest = await mysql.createConnection(development.connection);
-    try {
-        const [rows, fields] = await connectionTest.execute(query,params);
-        const newArray = rows.map(({Brand,Model,Year,Price})=>({Brand,Model,Year,Price}))
-        return newArray
-    } catch (error) {
-        throw new Error('something went wrong')
-    }finally{
-        await connectionTest.end()
-    }
+            return rows
+        } catch (error) {
+            throw (error)
+        }
 }
 
 module.exports ={
-    "FilterCarsBD":FilterCarsBD
+    FilterCarsBD
 }

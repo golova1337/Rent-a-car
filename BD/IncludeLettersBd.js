@@ -1,20 +1,21 @@
-const mysql = require('mysql2/promise');
-const {development} = require('../knexfile');
-
-async function IncludeLettersBd(query,params) {
-    const connectionTest = await mysql.createConnection(development.connection);
+async function IncludeLettersBd(knex,params) {
     try {
-        const [result] = await connectionTest.execute(query,params);
-        if (result.length === 0) {
-            return 'No hits'
+        const query = knex('cars').select('brand', 'model', 'year', 'price');
+
+        if (params.brand.trim().length !== 0) {
+        query.whereILike('brand', `%${params.brand}%`);
         }
-        const newArray = result.map(({Brand,Model,Price,Year})=>({Brand,Model,Price,Year}));
-        return newArray;
+
+        if (params.model.trim().length !== 0) {
+        query.andWhereILike('model', `%${params.model}%`);
+        }
+        const result = await query;
+        return result
     } catch (error) {
-        throw new Error('something went wrong')
+        throw new Error(error)
     }
 }
 
 module.exports = {
-    "IncludeLettersBd":IncludeLettersBd
+    IncludeLettersBd
 }
