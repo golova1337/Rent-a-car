@@ -22,5 +22,5 @@ async function returnCarBd(knex,data) {
 }
 
 module.exports={
-    "returnCarBd":returnCarBd
+    returnCarBd
 }

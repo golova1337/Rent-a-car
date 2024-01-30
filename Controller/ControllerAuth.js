@@ -223,7 +223,7 @@ const signUp = async (req,res)=>{
             await InsertNewUser(knex,newUser.name,newUser.lastName,newUser.email,HashResult,newUser.role);
             return res.status(201).json({you:'was created'}).end()
         } catch (error) {
-            return res.status(400).json(error.message)
+            return res.status(500).json({error: error.message})
         }
 }
 
@@ -397,7 +397,7 @@ const deletedUser = async (req,res)=>{
     await DeleteUserBD(knex,req.query.email)
     return res.status(200).json({[req.query.email]:'was deleted'})
    } catch (error) {
-    return res.status(500).json(error.message).end()
+    return res.status(500).json({message:'Internal Server Error'}).end()
    }
 }
 

@@ -12,5 +12,5 @@ async function RentalCarsBD(knex) {
 }
 
 module.exports ={
-    "RentalCarsBD":RentalCarsBD
+    RentalCarsBD
 }

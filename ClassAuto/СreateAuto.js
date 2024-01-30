@@ -14,5 +14,5 @@ class Auto{
 
 
 module.exports = {
-    "Auto":Auto
+    Auto
 }

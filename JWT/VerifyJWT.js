@@ -12,5 +12,5 @@ async function VerifyJWT(token) {
 }
 
 module.exports ={
-    "VerifyJWT":VerifyJWT
+    VerifyJWT
 }
