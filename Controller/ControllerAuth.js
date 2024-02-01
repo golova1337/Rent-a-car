@@ -1,13 +1,13 @@
-const {knex} = require('../bd/createConnection');
-const {CheckExistUserBDlogin} = require('../bd/check/checkExistUserBDlogin');
-const {CheckExistUserBDsignUp} = require('../bd/check/checkExistUserBDsignUp')
-const {InsertNewUser} = require('../BD/InsertNewUser')
-const { Users, Admin, SuperAdmin } = require('../ClassUsers/SuperClass')
-const {HashingPassword} = require('../Bcrypt/HashingPassword')
-const {ComparePassword} = require('../Bcrypt/ComparePassword');
-const {CreateJWT} = require('../jwt/createJWB');
-const {DeleteUserBD} = require('../bd/deleteUserBd');
-const {getAllUsersBd} = require('../BD/getAllUsresBd')
+const { knex } = require("../db/createConnection");
+const { CheckExistUserBDlogin } = require("../db/check/checkExistUserBDlogin");
+const { CheckExistUserBDsignUp } = require("../db/check/checkExistUserBDsignUp");
+const { InsertNewUser } = require("../db/InsertNewUser");
+const { Users, Admin, SuperAdmin } = require("../classUsers/SuperClass");
+const { HashingPassword } = require("../bcrypt/hashingPassword");
+const { ComparePassword } = require("../bcrypt/comparePassword");
+const { CreateJWT } = require("../jwt/createJWB");
+const { DeleteUserBD } = require("../db/deleteUserBd");
+const { getAllUsersBd } = require("../db/getAllUsresBd");
 /**
  * @swagger
  * components:
@@ -38,7 +38,7 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *     FilterCarBrand:
  *       in: query
  *       name: brand
- *       description: Brand car 
+ *       description: Brand car
  *       schema:
  *         type: string
  *
@@ -214,19 +214,18 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd')
  *                 value:
  *                   error: "User already exists"
  */
-const signUp = async (req,res)=>{
-        try {
-            const {name,lastName,email,password} = req.body;
-            await CheckExistUserBDsignUp(knex,email);
-            const newUser = new Users (name,lastName,email);
-            const HashResult = await HashingPassword(password);
-            await InsertNewUser(knex,newUser.name,newUser.lastName,newUser.email,HashResult,newUser.role);
-            return res.status(201).json({you:'was created'}).end()
-        } catch (error) {
-            return res.status(500).json({error: error.message})
-        }
-}
-
+const signUp = async (req, res) => {
+  try {
+    const { name, lastName, email, password } = req.body;
+    await CheckExistUserBDsignUp(knex, email);
+    const newUser = new Users(name, lastName, email);
+    const HashResult = await HashingPassword(password);
+    await InsertNewUser(knex, newUser.name, newUser.lastName, newUser.email, HashResult, newUser.role);
+    return res.status(201).json({ you: "was created" }).end();
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 /**
  * @swagger
@@ -276,24 +275,20 @@ const signUp = async (req,res)=>{
  *                   error: "User does not exist"
  */
 //вхід та видача JWT с  ролью юзера
-const login = async (req,res)=>{
-    try {
-        const {email,password} = req.body;
-        const {role,password_hash} = await CheckExistUserBDlogin(knex,email);
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const { role, password_hash } = await CheckExistUserBDlogin(knex, email);
 
-        const resultComparePassword = await ComparePassword(password,password_hash);
-        if (!resultComparePassword) res.status(401).json('Password is wrong').end()
-        
-        const token = await CreateJWT(email,role)
-        return res.status(200).json({'You logged on into the  account':token}).end()
-        
+    const resultComparePassword = await ComparePassword(password, password_hash);
+    if (!resultComparePassword) res.status(401).json("Password is wrong").end();
 
-    } catch (error) {
-        return res.status(500).json({ error: error.message });
-    };
-
-}
-
+    const token = await CreateJWT(email, role);
+    return res.status(200).json({ "You logged on into the  account": token }).end();
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
 
 /**
  * @swagger
@@ -338,19 +333,18 @@ const login = async (req,res)=>{
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
 // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
-const createAdmin = async (req,res)=>{
-    const {name,lastName,email,password} = req.body;
-    try {
-         await CheckExistUserBDsignUp(knex,email);
-        const hash = await HashingPassword(password);
-        const NewAdmin = SuperAdmin.CreateAdmin(name,lastName,email,hash);
-         await InsertNewUser(knex,name,lastName,email,hash,NewAdmin.role);
-        return res.status(201).json({message:NewAdmin}).end()
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
-}
-
+const createAdmin = async (req, res) => {
+  const { name, lastName, email, password } = req.body;
+  try {
+    await CheckExistUserBDsignUp(knex, email);
+    const hash = await HashingPassword(password);
+    const NewAdmin = SuperAdmin.CreateAdmin(name, lastName, email, hash);
+    await InsertNewUser(knex, name, lastName, email, hash, NewAdmin.role);
+    return res.status(201).json({ message: NewAdmin }).end();
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 /**
  * @swagger
@@ -391,15 +385,15 @@ const createAdmin = async (req,res)=>{
  *                   ReferenceError: email is not defined
  */
 //Видалення користувачів (Soft Delete) - адмін
-const deletedUser = async (req,res)=>{
-   try {
-    if (!req.query.email) throw new Error('Enter the data');
-    await DeleteUserBD(knex,req.query.email)
-    return res.status(200).json({[req.query.email]:'was deleted'})
-   } catch (error) {
-    return res.status(500).json({message:'Internal Server Error'}).end()
-   }
-}
+const deletedUser = async (req, res) => {
+  try {
+    if (!req.query.email) throw new Error("Enter the data");
+    await DeleteUserBD(knex, req.query.email);
+    return res.status(200).json({ [req.query.email]: "was deleted" });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" }).end();
+  }
+};
 
 /**
  * @swagger
@@ -439,22 +433,21 @@ const deletedUser = async (req,res)=>{
  *                   "error": "enter the role"
  */
 
-
 // Можливість бачити всіх користувачівб додав вибор по роли щоб можно було і працівників отримувати - адмін
-const getAllUsers = async(req,res)=>{
-    try {
-        if (!req.query.role) res.status(400).json({error:'enter the role'})
-        const result = await getAllUsersBd(knex,req.query.role);
-        return res.status(200).json({list:result}).end()
-    } catch (error) {
-        return res.status(500).json(error.message)
-    }
-}
+const getAllUsers = async (req, res) => {
+  try {
+    if (!req.query.role) res.status(400).json({ error: "enter the role" });
+    const result = await getAllUsersBd(knex, req.query.role);
+    return res.status(200).json({ list: result }).end();
+  } catch (error) {
+    return res.status(500).json(error.message);
+  }
+};
 
 module.exports = {
-    signUp,
-    login,
-    createAdmin,
-    deletedUser,
-    getAllUsers
-}
+  signUp,
+  login,
+  createAdmin,
+  deletedUser,
+  getAllUsers,
+};

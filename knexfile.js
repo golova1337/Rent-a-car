@@ -3,25 +3,23 @@
 /**
  * @type { Object.<string, import("knex").Knex.Config> }
  */
-module.exports  = {
-
+module.exports = {
   development: {
-    client: process.env.BD_CLIENT,
+    client: process.env.DB_CLIENT,
     connection: {
-      host: process.env.BD_HOST, 
-      port:process.env.BD_PORT,
-      user: process.env.BD_USER, 
-      password: process.env.BD_PASSWORD, 
-      database: process.env.BD_DATABASE 
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
     },
     pool: {
       min: 2,
       max: 10,
     },
     migrations: {
-      tableName: 'knex_migrations',
-      directory: './migrations' // Директория для хранения файлов миграций
-    }
-  }
-}
-
+      tableName: "knex_migrations",
+      directory: "./migrations", // Директория для хранения файлов миграций
+    },
+  },
+};

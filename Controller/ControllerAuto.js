@@ -1,16 +1,15 @@
-const {knex} = require('../bd/createConnection');
-const {Auto} = require('../ClassAuto/СreateAuto')
-const {InsertNewAutoBD} = require('../BD/InsertNewAutoBD');
-const {DeleteAutoBD} = require('../bd/deleteAutoBD');
-const {FilterCarsBD} = require('../BD/FilterCarsBD');
-const {IncludeLettersBd} = require('../BD/IncludeLettersBd');
-const {returnCarBd} = require('../BD/returnCarBd');
-const {RentalCarsBD} = require('../BD/RentalCarsBD');
-const {InsertNewRent} = require('../BD/Rent/InsertNewRent')
-const {GetAllCarsBd} = require('../bd/getAllCarsBd');
-const {checkUserBeforeRentCar} = require('../bd/rent/checkUserCarBeforeRentCar');
-const {getAllUsersBd} = require('../BD/getAllUsresBd');
-
+const { knex } = require("../db/createConnection");
+const { Auto } = require("../classAuto/СreateAuto");
+const { InsertNewAutoBD } = require("../db/InsertNewAutoBD");
+const { DeleteAutoBD } = require("../db/deleteAutoBD");
+const { FilterCarsBD } = require("../db/FilterCarsBD");
+const { IncludeLettersBd } = require("../db/IncludeLettersBd");
+const { returnCarBd } = require("../db/returnCarBd");
+const { RentalCarsBD } = require("../db/RentalCarsBD");
+const { InsertNewRent } = require("../db/Rent/InsertNewRent");
+const { GetAllCarsBd } = require("../db/getAllCarsBd");
+const { checkUserBeforeRentCar } = require("../db/rent/checkUserCarBeforeRentCar");
+const { getAllUsersBd } = require("../db/getAllUsresBd");
 
 /**
  * @swagger
@@ -41,17 +40,18 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd');
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//создания авто с занесением его в таблицу cars доступно только админу 
-const createAuto = async (req,res)=>{
-    try {
-        const {brand,model,number_plate,year,price} = req.body; 
-        // const newAuto =  new Auto(brand,model,number_plate,year,price);
-        const result = await InsertNewAutoBD(knex,brand,model,number_plate,year,price);
-        return res.status(201).json({message:'Car was created'}).end()
-    } catch (error) {
-            return res.status(500).json({message:'Internal Server Error'} );
-    }
-}
+//создания авто с занесением его в таблицу cars доступно только админу
+const createAuto = async (req, res) => {
+  try {
+    const { brand, model, number_plate, year, price } = req.body;
+    // const newAuto =  new Auto(brand,model,number_plate,year,price);
+    const result = await InsertNewAutoBD(knex, brand, model, number_plate, year, price);
+    return res.status(201).json({ message: "Car was created" }).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 /**
  * @swagger
  * /car/DeleteAuto:
@@ -91,18 +91,22 @@ const createAuto = async (req,res)=>{
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//удаление авто с таблицы cars доступно только админу 
-const DeleteAuot = async (req,res)=>{
-    try {
-        if (!req.query.number_plate) return res.status(400).json({message:'enter the machine number'}).end();
-         await DeleteAutoBD(knex,req.query.number_plate);
-        return res.status(200).json({ message: `Car number_plate = ${req.query.number_plate}  was deleted` }).end();
+//удаление авто с таблицы cars доступно только админу
+const DeleteAuot = async (req, res) => {
+  try {
+    if (!req.query.number_plate) return res.status(400).json({ message: "enter the machine number" }).end();
+    await DeleteAutoBD(knex, req.query.number_plate);
+    return res
+      .status(200)
+      .json({
+        message: `Car number_plate = ${req.query.number_plate}  was deleted`,
+      })
+      .end();
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" }).end();
+  }
+};
 
-    } catch (error) {
-        return res.status(500).json({ message: 'Internal Server Error' }).end();
-    }
-
-}
 /**
  * @swagger
  * /car/RentalCars:
@@ -132,15 +136,16 @@ const DeleteAuot = async (req,res)=>{
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
 //Можливість бачити які автівки зараз доступні для прокату - користувач і адмін
-const RentalCars = async (req,res)=>{
-        try {
-            const result = await RentalCarsBD(knex);
-            if (result.length === 0) return res.status(200).json({message:'There are no machines in rental'});
-            return res.status(200).json({'auto':result}).end();
-        } catch (error) {
-            return res.status(500).json({ message: 'Internal Server Error' }).end();
-        }
-}
+const RentalCars = async (req, res) => {
+  try {
+    const result = await RentalCarsBD(knex);
+    if (result.length === 0) return res.status(200).json({ message: "There are no machines in rental" });
+    return res.status(200).json({ auto: result }).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" }).end();
+  }
+};
+
 /**
  * @swagger
  * /car/FilterCars:
@@ -177,7 +182,7 @@ const RentalCars = async (req,res)=>{
  *                 summary: "Internal Server Error"
  *                 value:
  *                   "error": "Internal Server Error"
- *               
+ *
  *       '401':
  *         description: "Verification was unsuccessful"
  *         content:
@@ -186,22 +191,20 @@ const RentalCars = async (req,res)=>{
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
 //фільтрувати автівки що доступні по всім полям які є у автівки (наприклад brand, model, year etc)
-const FilterCars = async(req,res)=>{
-    try {
-        const { brand, model, price, year } = req.query;
-        if (!brand && !model && !price && !year) return res.status(400).json({message:'Enter any a data'})
+const FilterCars = async (req, res) => {
+  try {
+    const { brand, model, price, year } = req.query;
+    if (!brand && !model && !price && !year) return res.status(400).json({ message: "Enter any a data" });
 
-        const result = await FilterCarsBD(knex,req.query);
-        if (result.length === 0) {
-            return res.status(200).json({ error : 'Internal Server Error'})
-        }
-        return res.status(200).json({auto:result})
-
-    } catch (error) {
-        return res.status(500).json({message:'Internal Server Error'})
+    const result = await FilterCarsBD(knex, req.query);
+    if (result.length === 0) {
+      return res.status(200).json({ error: "Internal Server Error" });
     }
-
-}
+    return res.status(200).json({ auto: result });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 /**
  * @swagger
  * /car/getAllCars:
@@ -236,15 +239,15 @@ const FilterCars = async(req,res)=>{
  */
 
 //Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
-const GetAllCars = async(req,res)=>{
-    try {
-        const result =  await GetAllCarsBd(knex);
-        return res.status(200).json({'cars':result})
-    } catch (error) {
-        return res.status(500).json({message:'Internal Server Error'})
-    }
+const GetAllCars = async (req, res) => {
+  try {
+    const result = await GetAllCarsBd(knex);
+    return res.status(200).json({ cars: result });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
-}
 /**
  * @swagger
  * /car/includeLetters:
@@ -299,15 +302,15 @@ const GetAllCars = async(req,res)=>{
  *                   message:'Internal Server Error'
  */
 // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
-const includeLetters = async(req,res)=>{
-    try {
-        const { brand, model} = req.query;
-        const result = await IncludeLettersBd(knex,req.query)
-        return res.status(200).json({auto:result})
-    } catch (error) {
-        return res.status(500).json({message:'Internal Server Error'})
-    }
-}
+const includeLetters = async (req, res) => {
+  try {
+    const { brand, model } = req.query;
+    const result = await IncludeLettersBd(knex, req.query);
+    return res.status(200).json({ auto: result });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 /**
  * @swagger
@@ -330,13 +333,13 @@ const includeLetters = async(req,res)=>{
  *                 example: vasya@gmail.com
  *               brand:
  *                 type: string
- *                 example: audi 
+ *                 example: audi
  *               model:
  *                 type: string
- *                 example: rs8 
+ *                 example: rs8
  *               year:
  *                 type: integer
- *                 example: 2020 
+ *                 example: 2020
  *               startTime:
  *                 type: string
  *                 format: date-time
@@ -377,24 +380,25 @@ const includeLetters = async(req,res)=>{
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
 
-//аренда машин 
-const rent = async(req,res)=>{
-    const {email,brand,model,year,startTime,endTime} = req.body;
-    if (!email || !startTime || !endTime || !brand || !model || !year) return res.status(400).json({message:'enter the data'});
-    if (new Date(startTime)>new Date(endTime))  return res.status(400).json({message:'The start of the lease cannot be after the end of the lease.'});
-    
-    try {
-        const result = await checkUserBeforeRentCar(knex,email);
-        req.body.user_id = result;
+//аренда машин
+const rent = async (req, res) => {
+  const { email, brand, model, year, startTime, endTime } = req.body;
+  if (!email || !startTime || !endTime || !brand || !model || !year) return res.status(400).json({ message: "enter the data" });
+  if (new Date(startTime) > new Date(endTime))
+    return res.status(400).json({
+      message: "The start of the lease cannot be after the end of the lease.",
+    });
 
-         await InsertNewRent(knex,req.body);
-        return res.status(200).json("you rented").end()
-    } catch (error) {
-        return res.status(500).json({message:error.message}); 
-    }
+  try {
+    const result = await checkUserBeforeRentCar(knex, email);
+    req.body.user_id = result;
 
-
-}
+    await InsertNewRent(knex, req.body);
+    return res.status(200).json("you rented").end();
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 /**
  * @swagger
@@ -448,23 +452,23 @@ const rent = async(req,res)=>{
  */
 
 //возврат авто с аренды только админ может делать
-const returnCar = async(req,res)=>{
-    try {
-     if (!req.body.numberPlate || !req.body.endTime) return res.status(400).json({error:"enter the data"});
-         const result = await returnCarBd(knex,req.body);
-         return res.status(200).json({error:'The car has been returned'});
-    } catch (error) {
-         return res.status(400).json({message:error.message})
-    }
-}
+const returnCar = async (req, res) => {
+  try {
+    if (!req.body.numberPlate || !req.body.endTime) return res.status(400).json({ error: "enter the data" });
+    const result = await returnCarBd(knex, req.body);
+    return res.status(200).json({ error: "The car has been returned" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
 
 module.exports = {
-    createAuto,
-    DeleteAuot,
-    RentalCars,
-    FilterCars,
-    includeLetters,
-    GetAllCars,
-    returnCar,
-    rent
-}
+  createAuto,
+  DeleteAuot,
+  RentalCars,
+  FilterCars,
+  includeLetters,
+  GetAllCars,
+  returnCar,
+  rent,
+};
