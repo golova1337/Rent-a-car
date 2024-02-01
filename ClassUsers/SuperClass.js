@@ -8,6 +8,7 @@ class Users {
     this.email = email;
     this.role = "user";
   }
+
   displayInfo() {
     console.log(`Name: ${this.name}, lastName: ${this.lastName},email ${this.email}, Role: ${this.role}`);
   }

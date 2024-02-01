@@ -6,6 +6,7 @@ class Auto {
     this.price = price;
     this.year = year;
   }
+
   info() {
     console.log(`Brand: ${this.brand}, model: ${this.model},year ${this.year}, price: ${this.price}`);
   }

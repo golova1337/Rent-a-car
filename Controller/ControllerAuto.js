@@ -1,5 +1,5 @@
 const { knex } = require("../db/createConnection");
-const { Auto } = require("../classAuto/СreateAuto");
+// const { Auto } = require("../classAuto/СreateAuto");
 const { InsertNewAutoBD } = require("../db/InsertNewAutoBD");
 const { DeleteAutoBD } = require("../db/deleteAutoBD");
 const { FilterCarsBD } = require("../db/FilterCarsBD");
@@ -9,7 +9,7 @@ const { RentalCarsBD } = require("../db/RentalCarsBD");
 const { InsertNewRent } = require("../db/Rent/InsertNewRent");
 const { GetAllCarsBd } = require("../db/getAllCarsBd");
 const { checkUserBeforeRentCar } = require("../db/rent/checkUserCarBeforeRentCar");
-const { getAllUsersBd } = require("../db/getAllUsresBd");
+// const { getAllUsersBd } = require("../db/getAllUsresBd");
 
 /**
  * @swagger
@@ -40,12 +40,12 @@ const { getAllUsersBd } = require("../db/getAllUsresBd");
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//создания авто с занесением его в таблицу cars доступно только админу
+// создания авто с занесением его в таблицу cars доступно только админу
 const createAuto = async (req, res) => {
   try {
-    const { brand, model, number_plate, year, price } = req.body;
+    const { brand, model, numberPlate, year, price } = req.body;
     // const newAuto =  new Auto(brand,model,number_plate,year,price);
-    const result = await InsertNewAutoBD(knex, brand, model, number_plate, year, price);
+    await InsertNewAutoBD(knex, brand, model, numberPlate, year, price);
     return res.status(201).json({ message: "Car was created" }).end();
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" });
@@ -91,7 +91,7 @@ const createAuto = async (req, res) => {
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//удаление авто с таблицы cars доступно только админу
+// удаление авто с таблицы cars доступно только админу
 const DeleteAuot = async (req, res) => {
   try {
     if (!req.query.number_plate) return res.status(400).json({ message: "enter the machine number" }).end();
@@ -135,7 +135,7 @@ const DeleteAuot = async (req, res) => {
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//Можливість бачити які автівки зараз доступні для прокату - користувач і адмін
+// Можливість бачити які автівки зараз доступні для прокату - користувач і адмін
 const RentalCars = async (req, res) => {
   try {
     const result = await RentalCarsBD(knex);
@@ -190,7 +190,7 @@ const RentalCars = async (req, res) => {
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//фільтрувати автівки що доступні по всім полям які є у автівки (наприклад brand, model, year etc)
+// фільтрувати автівки що доступні по всім полям які є у автівки (наприклад brand, model, year etc)
 const FilterCars = async (req, res) => {
   try {
     const { brand, model, price, year } = req.query;
@@ -198,7 +198,7 @@ const FilterCars = async (req, res) => {
 
     const result = await FilterCarsBD(knex, req.query);
     if (result.length === 0) {
-      return res.status(200).json({ error: "Internal Server Error" });
+      return res.status(200).json({ message: "no cars" });
     }
     return res.status(200).json({ auto: result });
   } catch (error) {
@@ -238,7 +238,7 @@ const FilterCars = async (req, res) => {
  *                   message:'Internal Server Error'
  */
 
-//Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
+// Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
 const GetAllCars = async (req, res) => {
   try {
     const result = await GetAllCarsBd(knex);
@@ -304,7 +304,6 @@ const GetAllCars = async (req, res) => {
 // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
 const includeLetters = async (req, res) => {
   try {
-    const { brand, model } = req.query;
     const result = await IncludeLettersBd(knex, req.query);
     return res.status(200).json({ auto: result });
   } catch (error) {
@@ -380,7 +379,7 @@ const includeLetters = async (req, res) => {
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
 
-//аренда машин
+// аренда машин
 const rent = async (req, res) => {
   const { email, brand, model, year, startTime, endTime } = req.body;
   if (!email || !startTime || !endTime || !brand || !model || !year) return res.status(400).json({ message: "enter the data" });
@@ -451,11 +450,11 @@ const rent = async (req, res) => {
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
 
-//возврат авто с аренды только админ может делать
+// возврат авто с аренды только админ может делать
 const returnCar = async (req, res) => {
   try {
     if (!req.body.numberPlate || !req.body.endTime) return res.status(400).json({ error: "enter the data" });
-    const result = await returnCarBd(knex, req.body);
+    await returnCarBd(knex, req.body);
     return res.status(200).json({ error: "The car has been returned" });
   } catch (error) {
     return res.status(400).json({ message: error.message });

@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
 
 async function HashingPassword(password) {
-  return await bcrypt.hash(password, 10);
+  const result = await bcrypt.hash(password, 10);
+  return result;
 }
 
 module.exports = {

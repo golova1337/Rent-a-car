@@ -179,7 +179,7 @@ const { getAllUsersBd } = require("../db/getAllUsresBd");
  *           example: "verification was unsuccessful"
  */
 
-//регестрація юзера та занесення його в бд БЕЗ видачі JWT
+// регестрація юзера та занесення його в бд БЕЗ видачі JWT
 /**
  * @swagger
  * /signUp:
@@ -274,13 +274,13 @@ const signUp = async (req, res) => {
  *                 value:
  *                   error: "User does not exist"
  */
-//вхід та видача JWT с  ролью юзера
+// вхід та видача JWT с  ролью юзера
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const { role, password_hash } = await CheckExistUserBDlogin(knex, email);
+    const { role, passwordHash } = await CheckExistUserBDlogin(knex, email);
 
-    const resultComparePassword = await ComparePassword(password, password_hash);
+    const resultComparePassword = await ComparePassword(password, passwordHash);
     if (!resultComparePassword) res.status(401).json("Password is wrong").end();
 
     const token = await CreateJWT(email, role);
@@ -384,7 +384,7 @@ const createAdmin = async (req, res) => {
  *                 value:
  *                   ReferenceError: email is not defined
  */
-//Видалення користувачів (Soft Delete) - адмін
+// Видалення користувачів (Soft Delete) - адмін
 const deletedUser = async (req, res) => {
   try {
     if (!req.query.email) throw new Error("Enter the data");

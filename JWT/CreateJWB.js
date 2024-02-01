@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const Secret_Key = require("./secretKeyJwt");
+const SecretKey = require("./secretKeyJwt");
 
 async function CreateJWT(email, role) {
   try {
@@ -7,7 +7,7 @@ async function CreateJWT(email, role) {
       email: email,
       role: role,
     };
-    const token = await jwt.sign(payload, Secret_Key, { expiresIn: "1h" });
+    const token = await jwt.sign(payload, SecretKey, { expiresIn: "1h" });
     return token;
   } catch (error) {
     throw new Error("Failed to create JWT"); // Пример обработки ошибки

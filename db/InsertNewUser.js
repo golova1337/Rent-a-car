@@ -14,7 +14,6 @@ async function InsertNewUser(knex, name, lastname, email, HashResult, role) {
       password_hash: HashResult,
     });
     await trx.commit();
-    return;
   } catch (error) {
     await trx.rollback();
     throw error;

@@ -1,16 +1,16 @@
 async function FilterCarsBD(knex, params) {
-  try {
-    for (const key in params) {
-      if (params[key].trim().length === 0) {
-        delete params[key];
-      }
+  const data = {};
+  Object.keys(params).forEach((key) => {
+    if (params[key].trim().length !== 0) {
+      data[key] = params[key];
     }
-    const rows = await knex("cars").select("brand", "model", "year", "price").where(params);
+  });
+  data.is_deleted = false;
+  data.in_renting = false;
 
-    return rows;
-  } catch (error) {
-    throw error;
-  }
+  const rows = await knex("cars").select("brand", "model", "year", "price").where(data);
+
+  return rows;
 }
 
 module.exports = {
