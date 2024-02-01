@@ -4,16 +4,16 @@ const ValidtoBody = {
   CreateAuto: [
     body("brand").trim().notEmpty().isLength({ min: 2, max: 20 }),
     body("model").trim().notEmpty().isLength({ min: 2, max: 20 }),
-    body("number_plate").trim().notEmpty().isLength({ min: 2, max: 20 }),
+    body("numberPlate").trim().notEmpty().isLength({ min: 2, max: 20 }),
     body("price")
       .trim()
       .notEmpty()
-      .custom((value) => (!isNaN(value) ? true : false)),
+      .custom((value) => !Number.isNaN(value)),
     body("year")
       .trim()
       .notEmpty()
       .isLength({ min: 4, max: 4 })
-      .custom((value) => (!isNaN(value) ? true : false)),
+      .custom((value) => !Number.isNaN(value)),
   ],
   ValidationResult: (req, res, next) => {
     const result = validationResult(req);

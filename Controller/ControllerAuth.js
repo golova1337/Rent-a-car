@@ -281,7 +281,7 @@ const login = async (req, res) => {
     const { role, passwordHash } = await CheckExistUserBDlogin(knex, email);
 
     const resultComparePassword = await ComparePassword(password, passwordHash);
-    if (!resultComparePassword) res.status(401).json("Password is wrong").end();
+    if (!resultComparePassword) return res.status(401).json("Password is wrong").end();
 
     const token = await CreateJWT(email, role);
     return res.status(200).json({ "You logged on into the  account": token }).end();

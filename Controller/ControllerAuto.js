@@ -98,9 +98,7 @@ const DeleteAuot = async (req, res) => {
     await DeleteAutoBD(knex, req.query.number_plate);
     return res
       .status(200)
-      .json({
-        message: `Car number_plate = ${req.query.number_plate}  was deleted`,
-      })
+      .json({ message: `Car number_plate = ${req.query.number_plate}  was deleted` })
       .end();
   } catch (error) {
     return res.status(500).json({ message: "Internal Server Error" }).end();
