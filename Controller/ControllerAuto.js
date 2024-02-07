@@ -1,15 +1,15 @@
-const {Auto} = require('../ClassAuto/СreateAuto')
-const {InsertNewAutoBD} = require('../BD/InsertNewAutoBD');
-const {DeleteAutoBD} = require('../BD/DeleteAutoBD');
-const {FilterCarsBD} = require('../BD/FilterCarsBD');
-const {IncludeLettersBd} = require('../BD/IncludeLettersBd');
-const {returnCarBd} = require('../BD/returnCarBd');
-const {RentalCarsBD} = require('../BD/RentalCarsBD');
-const {InsertNewRent} = require('../BD/Rent/InsertNewRent')
-const {GetAllCarsBd} = require('../BD/GetAllCarsBd');
-const {RentCar} = require('../BD/Rent/RentCar');
-const {getAllUsersBd} = require('../BD/getAllUsresBd');
-
+const { knex } = require("../db/createConnection");
+// const { Auto } = require("../classAuto/СreateAuto");
+const { InsertNewAutoBD } = require("../db/InsertNewAutoBD");
+const { DeleteAutoBD } = require("../db/deleteAutoBD");
+const { FilterCarsBD } = require("../db/FilterCarsBD");
+const { IncludeLettersBd } = require("../db/IncludeLettersBd");
+const { returnCarBd } = require("../db/returnCarBd");
+const { RentalCarsBD } = require("../db/RentalCarsBD");
+const { InsertNewRent } = require("../db/Rent/InsertNewRent");
+const { GetAllCarsBd } = require("../db/getAllCarsBd");
+const { checkUserBeforeRentCar } = require("../db/rent/checkUserCarBeforeRentCar");
+// const { getAllUsersBd } = require("../db/getAllUsresBd");
 
 /**
  * @swagger
@@ -40,17 +40,18 @@ const {getAllUsersBd} = require('../BD/getAllUsresBd');
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//создания авто с занесением его в таблицу cars доступно только админу 
-const createAuto = async (req,res)=>{
-    try {
-        const {Brand,Model,Number,Year,Price} = req.body;
-        const newAuto =  new Auto(Brand,Model,Number,Year,Price);
-        const result = await InsertNewAutoBD(newAuto.brand,newAuto.model,newAuto.number,newAuto.year,newAuto.price);
-        return res.status(201).json({message:'Car was created'}).end()
-    } catch (error) {
-            return res.status(500).json( error.message );
-    }
-}
+// создания авто с занесением его в таблицу cars доступно только админу
+const createAuto = async (req, res) => {
+  try {
+    const { brand, model, numberPlate, year, price } = req.body;
+    // const newAuto =  new Auto(brand,model,number_plate,year,price);
+    await InsertNewAutoBD(knex, brand, model, numberPlate, year, price);
+    return res.status(201).json({ message: "Car was created" }).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
 /**
  * @swagger
  * /car/DeleteAuto:
@@ -90,20 +91,20 @@ const createAuto = async (req,res)=>{
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//удаление авто с таблицы cars доступно только админу 
-const DeleteAuot = async (req,res)=>{
-    try {
-        if (!req.query.Number) {
-            return res.status(400).json({message:'enter the machine number'}).end();
-        }
-        const result = await DeleteAutoBD(req.query.Number);
-        return res.status(200).json({ message: 'Car was deleted' }).end();
+// удаление авто с таблицы cars доступно только админу
+const DeleteAuot = async (req, res) => {
+  try {
+    if (!req.query.number_plate) return res.status(400).json({ message: "enter the machine number" }).end();
+    await DeleteAutoBD(knex, req.query.number_plate);
+    return res
+      .status(200)
+      .json({ message: `Car number_plate = ${req.query.number_plate}  was deleted` })
+      .end();
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" }).end();
+  }
+};
 
-    } catch (error) {
-        return res.status(500).json({ message: error.message }).end();
-    }
-
-}
 /**
  * @swagger
  * /car/RentalCars:
@@ -132,15 +133,17 @@ const DeleteAuot = async (req,res)=>{
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//Можливість бачити які автівки зараз доступні для прокату - користувач і адмін
-const RentalCars = async (req,res)=>{
-        const result = await RentalCarsBD();
-        if (result.length === 0) {
-            return res.status(200).json({message:'There are no machines in rental'})
-        }
-        return res.status(200).json({'auto':result})
+// Можливість бачити які автівки зараз доступні для прокату - користувач і адмін
+const RentalCars = async (req, res) => {
+  try {
+    const result = await RentalCarsBD(knex);
+    if (result.length === 0) return res.status(200).json({ message: "There are no machines in rental" });
+    return res.status(200).json({ auto: result }).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" }).end();
+  }
+};
 
-}
 /**
  * @swagger
  * /car/FilterCars:
@@ -152,7 +155,7 @@ const RentalCars = async (req,res)=>{
  *       - $ref: "#/components/parameters/FilterCarBrand"
  *       - $ref: "#/components/parameters/FilterCarbrandModel"
  *       - $ref: "#/components/parameters/FilterCarbrandYear"
- *       - $ref: "#/components/parameters/FilterCarbrandCoulor"
+ *       - $ref: "#/components/parameters/FilterCarbrandPrice"
  *     security:
  *       - JWT: []
  *     responses:
@@ -167,18 +170,17 @@ const RentalCars = async (req,res)=>{
  *                     auto:
  *                       type: array
  *                       items:
- *                         $ref: "#/components/schemas/RequestObjectCreateAuto"
- *       '400':
+ *                         $ref: "#/components/schemas/FilterAuto"
+ *       '500':
  *         description: "Filtering unsuccessful"
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *               example:
- *                 error: "Enter some data"
+ *             examples:
+ *               example1:
+ *                 summary: "Internal Server Error"
+ *                 value:
+ *                   "error": "Internal Server Error"
+ *
  *       '401':
  *         description: "Verification was unsuccessful"
  *         content:
@@ -186,43 +188,21 @@ const RentalCars = async (req,res)=>{
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
-//фільтрувати автівки що доступні по всім полям які є у автівки (наприклад brand, model, year etc)
-const FilterCars = async(req,res)=>{
-    try {
-        const { brand, model, price, year } = req.query;
-        if (!brand && !model && !price && !year) {
-            throw new Error('Enter some data')
-        }
-        let query = 'SELECT * FROM cars WHERE 1 = 1'; // Начальный SQL-запрос
-        const params = [];
-        if (brand) {
-            query += ' AND Brand = ?';
-            params.push(brand);
-          }
-        if (model) {
-            query += ' AND Model = ?';
-            params.push(model);
-          }
-        if (price) {
-            query += ' AND Price  = ?';
-            params.push(price);
-          }
-        if (year) {
-            query += ' AND Year  = ?';
-            params.push(year);
-          }
-        query+= ' AND is_deleted  = 0 AND in_renting  = 0'
-        const result = await FilterCarsBD(query,params);
-        if (result.length === 0) {
-            return res.status(200).json({message:'no such cars'})
-        }
-        return res.status(200).json({auto:result})
+// фільтрувати автівки що доступні по всім полям які є у автівки (наприклад brand, model, year etc)
+const FilterCars = async (req, res) => {
+  try {
+    const { brand, model, price, year } = req.query;
+    if (!brand && !model && !price && !year) return res.status(400).json({ message: "Enter any a data" });
 
-    } catch (error) {
-        return res.status(400).json({error:error.message})
+    const result = await FilterCarsBD(knex, req.query);
+    if (result.length === 0) {
+      return res.status(200).json({ message: "no cars" });
     }
-
-}
+    return res.status(200).json({ auto: result });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 /**
  * @swagger
  * /car/getAllCars:
@@ -245,18 +225,27 @@ const FilterCars = async(req,res)=>{
  *           application/json:
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
+ *       '500':
+ *         description: "Filtering unsuccessful"
+ *         content:
+ *           application/json:
+ *             examples:
+ *               example1:
+ *                 summary: "Internal Server Error"
+ *                 value:
+ *                   message:'Internal Server Error'
  */
 
-//Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
-const GetAllCars = async(req,res)=>{
-    try {
-        const result =  await GetAllCarsBd();
-        return res.status(200).json(result)
-    } catch (error) {
-        return res.status(500).json(error.message)
-    }
+// Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
+const GetAllCars = async (req, res) => {
+  try {
+    const result = await GetAllCarsBd(knex);
+    return res.status(200).json({ cars: result });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
-}
 /**
  * @swagger
  * /car/includeLetters:
@@ -300,31 +289,25 @@ const GetAllCars = async(req,res)=>{
  *           application/json:
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedError"
+ *       '500':
+ *         description: "Filtering unsuccessful"
+ *         content:
+ *           application/json:
+ *             examples:
+ *               example1:
+ *                 summary: "Internal Server Error"
+ *                 value:
+ *                   message:'Internal Server Error'
  */
 // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
-const includeLetters = async(req,res)=>{
-    try {
-        const { brand, model} = req.query;
-        if (!brand && !model) {
-            throw new Error('Enter some data')
-        }
-        let queryInclude = "SELECT * FROM cars WHERE 1 = 1 ";
-        let params = [];
-        if (brand) {
-            queryInclude+="AND  brand LIKE ? ";
-            params.push(`%${brand}%`)
-        }
-        if (req.query.model) {
-            queryInclude+="OR  model LIKE ? ";
-            params.push(`%${model}%`);
-        }
-        queryInclude+= ' AND is_deleted  = 0 AND in_renting  = 0'
-        const result = await IncludeLettersBd(queryInclude,params)
-        return res.status(200).json({auto:result})
-    } catch (error) {
-        return res.status(400).json(error.message)
-    }
-}
+const includeLetters = async (req, res) => {
+  try {
+    const result = await IncludeLettersBd(knex, req.query);
+    return res.status(200).json({ auto: result });
+  } catch (error) {
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 /**
  * @swagger
@@ -342,9 +325,18 @@ const includeLetters = async(req,res)=>{
  *         application/json:
  *           schema:
  *             properties:
- *               number:
+ *               email:
  *                 type: string
- *                 example: Ax2212
+ *                 example: vasya@gmail.com
+ *               brand:
+ *                 type: string
+ *                 example: audi
+ *               model:
+ *                 type: string
+ *                 example: rs8
+ *               year:
+ *                 type: integer
+ *                 example: 2020
  *               startTime:
  *                 type: string
  *                 format: date-time
@@ -377,29 +369,33 @@ const includeLetters = async(req,res)=>{
  *                 summary: Invalid data_3
  *                 value:
  *                   error: "You cannot have two cars in rental"
+ *       '401':
+ *         description: "Verification was unsuccessful"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UnauthorizedError"
  */
 
-//аренда машин 
-const rent = async(req,res)=>{
-    const {startTime,endTime,number} = req.body;
-    const {email} = req.payload
-    try {
-        if (!startTime || !endTime || !number) {
-            return res.status(400).json({message:'enter the data'})
-        }
-        const resultRentCar = await RentCar(number,email);
-        
-        const data = [];
-        data.push(email,number,startTime,endTime);
+// аренда машин
+const rent = async (req, res) => {
+  const { email, brand, model, year, startTime, endTime } = req.body;
+  if (!email || !startTime || !endTime || !brand || !model || !year) return res.status(400).json({ message: "enter the data" });
+  if (new Date(startTime) > new Date(endTime))
+    return res.status(400).json({
+      message: "The start of the lease cannot be after the end of the lease.",
+    });
 
-        const resultInsertRent = await InsertNewRent(data);
-        return res.status(200).json("you rented").end()
-    } catch (error) {
-        return res.status(400).json({ error: error.message }); 
-    }
+  try {
+    const result = await checkUserBeforeRentCar(knex, email);
+    req.body.user_id = result;
 
-
-}
+    await InsertNewRent(knex, req.body);
+    return res.status(200).json("you rented").end();
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
 
 /**
  * @swagger
@@ -444,28 +440,32 @@ const rent = async(req,res)=>{
  *                 summary: Invalid data_2
  *                 value:
  *                   error: "Enter the data"
+ *       '401':
+ *         description: "Verification was unsuccessful"
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UnauthorizedError"
  */
 
-//возврат авто с аренды только админ может делать
-const returnCar = async(req,res)=>{
-    try {
-     if (!req.body.number || !req.body.endTime) {
-         return res.status(400).json({error:"enter the data"})
-     }
-         const result = await returnCarBd(req.body.number,req.body.endTime);
-         return res.status(200).json({error:'The car has been returned'});
-    } catch (error) {
-         return res.status(400).json({message:error.message})
-    }
-}
+// возврат авто с аренды только админ может делать
+const returnCar = async (req, res) => {
+  try {
+    if (!req.body.numberPlate || !req.body.endTime) return res.status(400).json({ error: "enter the data" });
+    await returnCarBd(knex, req.body);
+    return res.status(200).json({ error: "The car has been returned" });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
 
 module.exports = {
-    "createAuto":createAuto,
-    "DeleteAuot":DeleteAuot,
-    "RentalCars":RentalCars,
-    "FilterCars":FilterCars,
-    "includeLetters":includeLetters,
-    "GetAllCars":GetAllCars,
-    "returnCar":returnCar,
-    "rent":rent
-}
+  createAuto,
+  DeleteAuot,
+  RentalCars,
+  FilterCars,
+  includeLetters,
+  GetAllCars,
+  returnCar,
+  rent,
+};

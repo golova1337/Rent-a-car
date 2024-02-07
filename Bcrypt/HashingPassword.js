@@ -1,15 +1,10 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 
 async function HashingPassword(password) {
-   try {
-    const Hash = await bcrypt.hash(password,10);
-    return Hash;
-   } catch (error) {
-    throw new Error('Hashing error: ' + error.message)
-   }
+  const result = await bcrypt.hash(password, 10);
+  return result;
 }
 
 module.exports = {
-    "HashingPasswor" : HashingPassword
-}
-
+  HashingPassword,
+};
