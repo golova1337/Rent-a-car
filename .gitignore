@@ -2,3 +2,4 @@ node_modules
 .DS_Store
 mysql
 .env
+reference/db/migrations/20240103121836_create_table_rentals_currently.js

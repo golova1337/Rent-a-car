@@ -19,7 +19,7 @@ module.exports = {
     },
     migrations: {
       tableName: "knex_migrations",
-      directory: "./migrations", // Директория для хранения файлов миграций
+      directory: "./reference/db/migrations", // Директория для хранения файлов миграций
     },
   },
 };
