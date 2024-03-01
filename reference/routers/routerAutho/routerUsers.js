@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { signUp, login, createAdmin, deletedUser, getAllUsers } = require("../../controller/controllerUsers");
 const { validator } = require("../../middleware/validator/validatorBody");
-const { jwt } = require("../../utils/jwt/checkJWT");
+const { checkJwt, checkRole } = require("../../middleware/jwt/checkJwt");
 
 // Реєстрація користувачів
 router.post("/registration", validator.validtoBodySingUP, validator.ValidationResult, signUp);
@@ -11,12 +11,12 @@ router.post("/registration", validator.validtoBodySingUP, validator.ValidationRe
 router.post("/login", validator.validtoBodyLogin, validator.ValidationResult, login);
 
 // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
-router.post("/superadmin/creation-admin", jwt.checkJWTSuperadmin, validator.validtoBodyCreateAdmin, validator.ValidationResult, createAdmin);
+router.post("/superadmin/creation-admin", checkJwt, checkRole("superadmin"), validator.validtoBodyCreateAdmin, validator.ValidationResult, createAdmin);
 
 // Видалення користувачів (Soft Delete) - адмін
-router.delete("/admin/:id", jwt.checkJWTadmin, deletedUser);
+router.delete("/admin/:id", checkJwt, checkRole("admin"), deletedUser);
 
 // Можливість бачити всіх користувачів - адмін
-router.get("/admin/all-users", jwt.checkJWTadmin, getAllUsers);
+router.get("/admin/all-users", checkJwt, checkRole("admin"), getAllUsers);
 
 module.exports = router;

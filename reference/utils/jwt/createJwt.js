@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const SecretKey = require("./secretKeyJwt");
 
-async function CreateJWT(email, role) {
+async function createJwt(email, role) {
   try {
     const payload = {
       email: email,
@@ -15,5 +15,5 @@ async function CreateJWT(email, role) {
 }
 
 module.exports = {
-  CreateJWT,
+  createJwt,
 };

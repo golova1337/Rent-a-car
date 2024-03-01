@@ -1,31 +1,31 @@
 const express = require("express");
-const car = express.Router(); // имя роутера
-const { jwt } = require("../../utils/jwt/checkJWT"); // проверка что jwt админа или просто то что jwt верный
+const cars = express.Router(); // имя роутера
+const { checkJwt, checkRole } = require("../../middleware/jwt/checkJwt");
 const { validator } = require("../../middleware/validator/validatorBody");
-const { createAuto, deleteAuot, getCarsAreBeingRented, getFilteredCars, getSearchCars, getAllCars, reclaimCar, rentCar } = require("../../controller/controllerAuto"); // контролерры
+const { createAuto, deleteAuot, getCarsAreBeingRented, getFilteredCars, getSearchCars, getAllCars, reclaimCar, rentCar } = require("../../controller/controllerCars"); // контролерры
 
 // Створення автівок - тільки адміном
-car.post("/admin/creation-car", jwt.checkJWTadmin, validator.createAuto, validator.ValidationResult, createAuto);
+cars.post("/admin/creation-car", checkJwt, checkRole("admin"), validator.ValidationResult, createAuto);
 
 // видалення автівок - тільки адміном
-car.delete("/admin/:id", jwt.checkJWTadmin, validator.validatoParams, deleteAuot);
+cars.delete("/admin/:id", checkJwt, checkRole("admin"), validator.validatoParams, deleteAuot);
 
 // Можливість бачити які автівки зараз в прокаті - адмін.
-car.get("/admin/lease", jwt.checkJWTadmin, getCarsAreBeingRented);
+cars.get("/admin/lease", checkJwt, checkRole("admin"), getCarsAreBeingRented);
 
 // Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
-car.get("/all-cars", jwt.checkJWT, getAllCars);
+cars.get("/all-cars", checkJwt, checkRole("user"), getAllCars);
 
 // можливість фільтрувати автівки що доступні  brand filter price админом и пользователем
-car.get("/filtration", jwt.checkJWT, getFilteredCars);
+cars.get("/filtration", checkJwt, checkRole("user"), getFilteredCars);
 
 // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
-car.get("/search", jwt.checkJWT, getSearchCars);
+cars.get("/search", checkJwt, checkRole("user"), getSearchCars);
 
 // брати на прокат автівку. Доки користувач користується автівкою він не може взяти ще одну. якщо авто в арнеді чи відаленне теж не може взяті
-car.post("/lease", jwt.checkJWT, validator.validatorDate, validator.ValidationResult, rentCar);
+cars.post("/lease", checkJwt, checkRole("user"), validator.validatorDate, validator.ValidationResult, rentCar);
 
 // повернення авто тільки адміном
-car.put("/admin/reclaim", jwt.checkJWTadmin, validator.validtoBodyReclaim, validator.ValidationResult, reclaimCar);
+cars.put("/admin/reclaim", checkJwt, checkRole("admin"), validator.validtoBodyReclaim, validator.ValidationResult, reclaimCar);
 
-module.exports = car;
+module.exports = cars;

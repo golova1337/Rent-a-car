@@ -1,6 +1,6 @@
 const { knex } = require("../db/config/createConnection");
-const passwordManaged = require("../utils/bcrypt/ClassPassword");
-const { CreateJWT } = require("../utils/jwt/createJWB");
+const { comparePassword, hashingPassword } = require("../utils/bcrypt/password");
+const { createJwt } = require("../utils/jwt/createJwt");
 const UsersModel = require("../models/modelUsers/ModelUser");
 const dbUser = new UsersModel(knex);
 /**
@@ -214,7 +214,7 @@ const signUp = async (req, res) => {
   try {
     const { name, lastName, email, password } = req.body;
     await dbUser.checkExistUserBDsignUp(email);
-    const hashedPassword = await passwordManaged.hashingPassword(password);
+    const hashedPassword = await hashingPassword(password);
     const result = await dbUser.insertNewUser(name, lastName, email, hashedPassword, "user");
     return res.status(201).json({ message: "was created", id: result }).end();
   } catch (error) {
@@ -275,8 +275,8 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const [role, passwordHash, id] = await dbUser.checkExistUserBDlogin(email);
-    await passwordManaged.comparePassword(password, passwordHash);
-    const token = await CreateJWT(email, role);
+    await comparePassword(password, passwordHash);
+    const token = await createJwt(email, role);
     return res.status(200).json({ id: id, token: token }).end();
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -330,7 +330,7 @@ const createAdmin = async (req, res) => {
   const { name, lastName, email, password } = req.body;
   try {
     await dbUser.checkExistUserBDsignUp(email);
-    const hash = await passwordManaged.hashingPassword(password);
+    const hash = await hashingPassword(password);
     const id = await dbUser.insertNewUser(name, lastName, email, hash, "admin");
     return res.status(201).json({ message: name, lastName, email, id }).end();
   } catch (error) {

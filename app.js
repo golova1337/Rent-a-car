@@ -7,14 +7,14 @@ const swaggerUi = require("swagger-ui-express");
 const options = require("./reference/openApi/apiDoc");
 const app = express();
 const router = require("./reference/routers/routerAutho/routerUsers.js");
-const car = require("./reference/routers/routerCar/routerCar.js");
+const cars = require("./reference/routers/routerCars/routerCars.js");
 
 const Port = 5500;
 
 app.use(express.json());
 
 app.use("/users", router);
-app.use("/cars", car);
+app.use("/cars", cars);
 
 process.on("SIGINT", async () => {
   try {
