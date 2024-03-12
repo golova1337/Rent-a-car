@@ -2,3 +2,5 @@ node_modules
 .DS_Store
 mysql
 .env
+reference/models/basicModel
+reference/models/usersmodel

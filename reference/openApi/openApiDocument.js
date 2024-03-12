@@ -10,7 +10,7 @@ const options = {
       },
     },
   },
-  apis: ["reference/controller/controllerUsers.js", "reference/controller/controllerCars.js"], // path к маршрутам с комментариями JSDoc
+  apis: ["reference/controllers/Users.controller.js", "reference/controllers/Cras.controller.js"], // path к маршрутам с комментариями JSDoc
 };
 
 module.exports = options;

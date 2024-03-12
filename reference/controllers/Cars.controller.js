@@ -1,10 +1,10 @@
 const { knex } = require("../db/config/createConnection");
-const CarsModel = require("../models/modelCar/ModelCar");
+const CarsModel = require("../models/carModel/Car.model");
 const dbCars = new CarsModel(knex);
 
 /**
  * @swagger
- * /car/admin/creation-car:
+ * /cars/creation-car:
  *   post:
  *     summary: "Create new auto (Admin only)"
  *     tags:
@@ -44,7 +44,7 @@ const createAuto = async (req, res) => {
 
 /**
  * @swagger
- * /car/admin/:id:
+ * /cars/:id:
  *   delete:
  *     summary: "Admin can soft delete a car"
  *     description: "When the car is deleted, it remains in the table."
@@ -96,7 +96,7 @@ const deleteAuot = async (req, res) => {
 
 /**
  * @swagger
- * /car/admin/lease:
+ * /cars/lease:
  *   get:
  *     summary: "Admin can view the list of cars currently in rental"
  *     tags:
@@ -134,7 +134,7 @@ const getCarsAreBeingRented = async (req, res) => {
 
 /**
  * @swagger
- * /car/filtration:
+ * /cars/filtration:
  *   get:
  *     summary: "Both an admin and a user can filter cars based on brand, model, price, year, or any combination of these criteria, excluding those currently in rental."
  *     tags:
@@ -188,7 +188,7 @@ const getFilteredCars = async (req, res) => {
 };
 /**
  * @swagger
- * /car//all-cars:
+ * /cars/all-cars:
  *   get:
  *     summary: "Get all cars"
  *     tags:
@@ -231,7 +231,7 @@ const getAllCars = async (req, res) => {
 
 /**
  * @swagger
- * /car/search:
+ * /cars/search:
  *   get:
  *     summary: "Substring"
  *     description: "The user has the ability to perform a quick search by the name and brand. For example, if the user enters 'su,' it should return all cars where the name or brand contains such a substring (Subaru, Suzuki, Toyota Suburban, etc.), excluding those currently in rental."
@@ -294,7 +294,7 @@ const getSearchCars = async (req, res) => {
 
 /**
  * @swagger
- * /car/lease:
+ * /cars/lease:
  *   post:
  *     summary: "The user can lease a car."
  *     description: "The user can only have one car on lease at a time. If the car is already rented, the user cannot lease another car."
@@ -363,7 +363,7 @@ const rentCar = async (req, res) => {
 
 /**
  * @swagger
- * /car/admin/:
+ * /cars/reclaim
  *   put:
  *     summary: "Only an admin can process the return of the car."
  *     description: "When a car is returned, update the data in the table regarding its status, indicating whether it is in rental or not. The lease information, along with the actual time finished, is moved to another table, 'Archive_lease,' and is removed from the 'Rentals' table"

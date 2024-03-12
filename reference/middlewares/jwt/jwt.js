@@ -4,8 +4,8 @@ const checkJwt = async (req, res, next) => {
     return res.status(401).json({ message: "Authorization header is missing" });
   }
   try {
-    const payload = await verifyJwt(req.headers.authorization);
-    req.payload = payload;
+    const decoded = await verifyJwt(req.headers.authorization);
+    req.user = decoded;
     next();
   } catch (error) {
     return res.status(401).json({ message: error.message }).end();
@@ -14,7 +14,10 @@ const checkJwt = async (req, res, next) => {
 
 const checkRole = (role) => {
   return (req, res, next) => {
-    if (!req.payload || req.payload.role !== role) {
+    // if (!req.user) {
+    //   return res.status(403).json({ message: "sufficient privileges" });
+    // }
+    if (req.user.role !== role) {
       return res.status(403).json({ message: "sufficient privileges" });
     }
     next();

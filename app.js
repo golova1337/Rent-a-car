@@ -4,17 +4,17 @@ const { knex } = require("./reference/db/config/createConnection");
 const express = require("express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const options = require("./reference/openApi/apiDoc");
+const options = require("./reference/openApi/openApiDocument.js");
 const app = express();
-const router = require("./reference/routers/routerAutho/routerUsers.js");
-const cars = require("./reference/routers/routerCars/routerCars.js");
+const usersRouter = require("./reference/routers/routerAutho/Users.router.js");
+const carsRouter = require("./reference/routers/routerCars/Cars.router.js");
 
 const Port = 5500;
 
 app.use(express.json());
 
-app.use("/users", router);
-app.use("/cars", cars);
+app.use("/users", usersRouter);
+app.use("/cars", carsRouter);
 
 process.on("SIGINT", async () => {
   try {

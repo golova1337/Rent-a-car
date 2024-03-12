@@ -1,4 +1,4 @@
-const { BaseModel } = require("../modelBasic/BaseModel");
+const { BaseModel } = require("../basicModel/Base.model");
 const { TABLES } = require("../../db/config/tablesCars");
 
 class CarsModel extends BaseModel {

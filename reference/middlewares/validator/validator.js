@@ -1,14 +1,14 @@
 const { body, param, validationResult } = require("express-validator");
 
 const validator = {
-  validtoBodySingUP: [
+  validtorBodySingUP: [
     body("name").trim().notEmpty().isLength({ min: 4, max: 32 }),
     body("lastName").trim().notEmpty().isLength({ min: 4, max: 52 }),
     body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(),
     body("password").trim().notEmpty().isLength({ min: 10, max: 32 }),
   ],
 
-  validtoBodyLogin: [body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(), body("password").trim().notEmpty().isLength({ min: 10, max: 32 })],
+  validtorBodyLogin: [body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(), body("password").trim().notEmpty().isLength({ min: 10, max: 32 })],
 
   createAuto: [
     body("brand").trim().notEmpty().isLength({ min: 2, max: 20 }),
@@ -25,28 +25,22 @@ const validator = {
       .custom((value) => !Number.isNaN(value)),
   ],
 
-  validtoBodyCreateAdmin: [
+  validtorBodyCreateAdmin: [
     body("name").trim().notEmpty().isLength({ min: 4, max: 32 }),
     body("lastName").trim().notEmpty().isLength({ min: 4, max: 52 }),
     body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(),
     body("password").trim().notEmpty().isLength({ min: 10, max: 32 }),
   ],
-  
-  validtoBodyReclaim: [
+
+  validtorBodyReclaim: [
     body("id")
       .trim()
       .notEmpty()
       .custom((value) => !Number.isNaN(value)),
   ],
 
-  validatoParams: (req, res, next) => {
-    const id = req.params.id;
-    if (id.trim().length !== 0 && !isNaN(id)) {
-      next();
-    } else {
-      res.status(400).send("Invalid id parameter");
-    }
-  },
+  validatorParamsId: param("id").trim().notEmpty().isInt(),
+
   validatorDate: [
     body("start_time").exists().withMessage("Start date is required"),
     body("end_time").exists().withMessage("End date is required"),
@@ -59,7 +53,7 @@ const validator = {
       .withMessage("End date must be greater than or equal to start date"),
   ],
 
-  ValidationResult: (req, res, next) => {
+  validationResult: (req, res, next) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
       return res.status(400).json({ [result.errors[0].msg]: result.errors[0].path });
