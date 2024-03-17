@@ -1,9 +1,9 @@
 const { knex } = require("../db/config/createConnection");
 
-const UserSevice = require("../services/usersService/User.service");
+const UserSevice = require("../services/userService/User.service");
 const userSevice = new UserSevice(knex);
 
-const AdminUserService = require("../services/usersService/Admin.user.service");
+const AdminUserService = require("../services/userService/Admin.user.service");
 const adminUserService = new AdminUserService(knex);
 
 /**
@@ -180,7 +180,7 @@ class ControllerUsers {
   // регестрація юзера та занесення його в бд БЕЗ видачі JWT
   /**
    * @swagger
-   * /signUp:
+   * /:
    *   post:
    *     summary: "Register a new user and obtain a JSON Web Token (JWT)"
    *     tags:
@@ -211,12 +211,21 @@ class ControllerUsers {
    *               example2:
    *                 summary: User already exists
    *                 value:
-   *                   error: "User already exists"
+   *                   error: "User with this email already exists"
+   *       '500':
+   *         description: User already exists.
+   *         content:
+   *           application/json:
+   *             examples:
+   *               example1:
+   *                 summary: User already exists
+   *                 value:
+   *                   error: "User with this email already exists"
    */
   static async signUp(req, res) {
     try {
-      const { name, lastName, email, password } = req.body;
-      const result = await userSevice.singUp(name, lastName, email, password, "user");
+      const body = req.body;
+      const result = await userSevice.singUp({ ...body, role: "user" });
       return res.status(201).json({ message: "User was created", id: result }).end();
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -274,8 +283,9 @@ class ControllerUsers {
   // вхід та видача JWT с  ролью юзера
   static async login(req, res) {
     try {
-      const { id, token } = await userSevice.login(req.body);
-      return res.status(200).json({ id: id, token: token }).end();
+      const body = req.body;
+      const token = await userSevice.login(body);
+      return res.status(200).json({ token: token }).end();
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -325,9 +335,9 @@ class ControllerUsers {
    */
   // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
   static async createAdmin(req, res) {
-    const { name, lastName, email, password } = req.body;
+    const body = req.body;
     try {
-      const result = await userSevice.singUp(name, lastName, email, password, "admin");
+      const result = await userSevice.singUp({ ...body, role: "admin" });
       return res.status(201).json({ message: "Admin was created", id: result }).end();
     } catch (error) {
       return res.status(500).json({ error: error.message });
@@ -375,8 +385,9 @@ class ControllerUsers {
   // Видалення користувачів (Soft Delete) - адмін
   static async deletedUser(req, res) {
     try {
-      await adminUserService.deleteUserBD(req.params.id);
-      return res.status(200).json({ [req.params.id]: "was deleted" });
+      const id = req.params.id;
+      await adminUserService.delete(id);
+      return res.status(200).json({ id: "was deleted" });
     } catch (error) {
       return res.status(500).json({ message: "Internal Server Error" }).end();
     }
@@ -421,9 +432,10 @@ class ControllerUsers {
    */
 
   // Можливість бачити всіх користувачівб додав вибор по роли щоб можно було і працівників отримувати - адмін
-  static async getAllUsers(req, res) {
+  static async getAll(req, res) {
     try {
-      const result = await adminUserService.getAllUsers();
+      const role = req.query.role;
+      const result = await adminUserService.getAll(role);
       return res.status(200).json({ list: result }).end();
     } catch (error) {
       return res.status(500).json(error.message);

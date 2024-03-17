@@ -1,10 +1,10 @@
 const jwt = require("jsonwebtoken");
 const SecretKey = require("./secretKeyJwt");
 
-async function createJwt(email, role) {
+async function createJwt(id, role) {
   try {
     const payload = {
-      email: email,
+      id: id,
       role: role,
     };
     const token = await jwt.sign(payload, SecretKey, { expiresIn: "1h" });

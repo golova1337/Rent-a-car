@@ -3,7 +3,7 @@ const { body, param, validationResult } = require("express-validator");
 const validator = {
   validtorBodySingUP: [
     body("name").trim().notEmpty().isLength({ min: 4, max: 32 }),
-    body("lastName").trim().notEmpty().isLength({ min: 4, max: 52 }),
+    body("lastname").trim().notEmpty().isLength({ min: 4, max: 52 }),
     body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(),
     body("password").trim().notEmpty().isLength({ min: 10, max: 32 }),
   ],

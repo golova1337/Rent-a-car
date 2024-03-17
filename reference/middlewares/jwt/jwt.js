@@ -1,10 +1,10 @@
 const { verifyJwt } = require("../../utils/jwt/verifyJwt");
-const checkJwt = async (req, res, next) => {
+const checkJwt = (req, res, next) => {
   if (!req.headers.authorization) {
     return res.status(401).json({ message: "Authorization header is missing" });
   }
   try {
-    const decoded = await verifyJwt(req.headers.authorization);
+    const decoded = verifyJwt(req.headers.authorization);
     req.user = decoded;
     next();
   } catch (error) {
@@ -12,15 +12,13 @@ const checkJwt = async (req, res, next) => {
   }
 };
 
-const checkRole = (role) => {
+const checkRole = (roles) => {
   return (req, res, next) => {
-    // if (!req.user) {
-    //   return res.status(403).json({ message: "sufficient privileges" });
-    // }
-    if (req.user.role !== role) {
+    if (roles.includes(req.user.role)) {
+      next();
+    } else {
       return res.status(403).json({ message: "sufficient privileges" });
     }
-    next();
   };
 };
 
