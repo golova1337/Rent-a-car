@@ -225,8 +225,8 @@ class ControllerUsers {
   static async signUp(req, res) {
     try {
       const body = req.body;
-      const result = await userSevice.singUp({ ...body, role: "user" });
-      return res.status(201).json({ message: "User was created", id: result }).end();
+      await userSevice.singUp({ ...body, role: "user" });
+      return res.status(201).json({ message: "user was created" }).end();
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -334,11 +334,11 @@ class ControllerUsers {
    *               $ref: "#/components/schemas/UnauthorizedError"
    */
   // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
-  static async createAdmin(req, res) {
+  static async create(req, res) {
     const body = req.body;
     try {
-      const result = await userSevice.singUp({ ...body, role: "admin" });
-      return res.status(201).json({ message: "Admin was created", id: result }).end();
+      await userSevice.singUp({ ...body, role: "admin" });
+      return res.status(201).json({ message: "admin was created" }).end();
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -383,11 +383,11 @@ class ControllerUsers {
    *                   ReferenceError: email is not defined
    */
   // Видалення користувачів (Soft Delete) - адмін
-  static async deletedUser(req, res) {
+  static async delete(req, res) {
     try {
       const id = req.params.id;
       await adminUserService.delete(id);
-      return res.status(200).json({ id: "was deleted" });
+      return res.status(200).json({ message: "was deleted" });
     } catch (error) {
       return res.status(500).json({ message: "Internal Server Error" }).end();
     }

@@ -19,7 +19,6 @@ class UserAccess {
         password_hash: body.hash,
       });
       await trx.commit();
-      return id[0];
     } catch (error) {
       await trx.rollback();
       if (error.sqlState === "23000") {

@@ -11,8 +11,7 @@ class UserSevice {
   async singUp(body) {
     try {
       const hash = await hashingPassword(body.password);
-      const result = await this.userAccess.insertNewUser({ ...body, hash: hash });
-      return result;
+      await this.userAccess.insertNewUser({ ...body, hash: hash });
     } catch (error) {
       throw new Error(error.message);
     }

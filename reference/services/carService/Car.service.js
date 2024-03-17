@@ -7,8 +7,7 @@ class CarService {
   }
 
   async insert(body) {
-    const result = await this.carAccess.insert(body);
-    return result;
+    await this.carAccess.insert(body);
   }
 
   async delete(id) {

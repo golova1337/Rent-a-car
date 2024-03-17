@@ -36,12 +36,8 @@ class ControllerCar {
   static async create(req, res) {
     try {
       const body = req.body;
-      const result = await carService.insert(body);
-      req.body.id = result;
-      return res
-        .status(201)
-        .json({ message: { ...body, id: result } })
-        .end();
+      await carService.insert(body);
+      return res.status(201).json({ message: body }).end();
     } catch (error) {
       return res.status(500).json({ message: "Internal Server Error" });
     }
@@ -91,10 +87,7 @@ class ControllerCar {
     try {
       const id = req.params.id;
       await carService.delete(id);
-      return res
-        .status(200)
-        .json({ message: `Car ${id}  was deleted` })
-        .end();
+      return res.status(200).json({ message: `Car  was deleted` }).end();
     } catch (error) {
       return res.status(500).json({ message: "Internal Server Error" }).end();
     }
@@ -132,7 +125,7 @@ class ControllerCar {
   static async lease(req, res) {
     try {
       const result = await carService.lease();
-      return res.status(200).json({ auto: result }).end();
+      return res.status(200).json({ message: result }).end();
     } catch (error) {
       return res.status(500).json({ message: "Internal Server Error" }).end();
     }

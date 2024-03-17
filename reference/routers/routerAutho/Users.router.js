@@ -11,10 +11,10 @@ users.post("/", validator.validtorBodySingUP, validator.validationResult, Contro
 users.post("/login", validator.validtorBodyLogin, validator.validationResult, ControllerUsers.login);
 
 // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
-users.post("/creation-admin", checkJwt, checkRole(["superadmin"]), validator.validtorBodyCreateAdmin, validator.validationResult, ControllerUsers.createAdmin);
+users.post("/creation-admin", checkJwt, checkRole(["superadmin"]), validator.validtorBodyCreateAdmin, validator.validationResult, ControllerUsers.create);
 
 // Видалення користувачів (Soft Delete) - адмін
-users.delete("/:id", checkJwt, checkRole(["admin"]), validator.validatorParamsId, validator.validationResult, ControllerUsers.deletedUser);
+users.delete("/:id", checkJwt, checkRole(["admin"]), validator.validatorParamsId, validator.validationResult, ControllerUsers.delete);
 
 // Можливість бачити всіх користувачів - адмін
 users.get("/", checkJwt, checkRole(["admin"]), ControllerUsers.getAll);

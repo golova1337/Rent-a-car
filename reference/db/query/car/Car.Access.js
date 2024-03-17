@@ -6,8 +6,7 @@ class CarAccess {
   }
 
   async insert(body) {
-    const result = await this.knex(TABLES.CARS).insert(body);
-    return result[0];
+    await this.knex(TABLES.CARS).insert(body);
   }
 
   async delete(id) {
