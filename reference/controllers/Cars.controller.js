@@ -1,5 +1,5 @@
-const { knex } = require("../db/config/createConnection");
-const CarService = require("../services/carService/Car.service");
+const { knex } = require("../db/config/connection");
+const CarService = require("../services/Car.service");
 const carService = new CarService(knex);
 
 /**
@@ -32,7 +32,7 @@ const carService = new CarService(knex);
  *               $ref: "#/components/schemas/UnauthorizedError"
  */
 // создания авто с занесением его в таблицу cars доступно только админу
-class ControllerCar {
+class CarsController {
   static async create(req, res) {
     try {
       const body = req.body;
@@ -367,4 +367,4 @@ class ControllerCar {
   }
 }
 
-module.exports = ControllerCar;
+module.exports = CarsController;

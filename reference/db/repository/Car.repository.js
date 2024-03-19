@@ -1,4 +1,4 @@
-const { TABLES } = require("../../config/tablesCars");
+const { TABLES } = require("../config/tablesCars");
 
 class CarAccess {
   constructor(knex) {

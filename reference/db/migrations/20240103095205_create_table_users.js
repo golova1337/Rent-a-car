@@ -8,6 +8,7 @@ exports.up = function (knex) {
     table.string("name", 50).notNullable();
     table.string("lastname", 50).notNullable();
     table.string("email").notNullable().unique();
+    table.string("password_hash").notNullable();
     table.enu("role", ["user", "admin", "superadmin"]).notNullable();
     table.timestamps(true, true);
     table.boolean("is_deleted").defaultTo(false);

@@ -1,16 +1,7 @@
 const { body, param, validationResult } = require("express-validator");
 
 const validator = {
-  validtorBodySingUP: [
-    body("name").trim().notEmpty().isLength({ min: 4, max: 32 }),
-    body("lastname").trim().notEmpty().isLength({ min: 4, max: 52 }),
-    body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(),
-    body("password").trim().notEmpty().isLength({ min: 10, max: 32 }),
-  ],
-
-  validtorBodyLogin: [body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(), body("password").trim().notEmpty().isLength({ min: 10, max: 32 })],
-
-  createAuto: [
+  create: [
     body("brand").trim().notEmpty().isLength({ min: 2, max: 20 }),
     body("model").trim().notEmpty().isLength({ min: 2, max: 20 }),
     body("number_plate").trim().notEmpty().isLength({ min: 2, max: 20 }),
@@ -25,23 +16,16 @@ const validator = {
       .custom((value) => !Number.isNaN(value)),
   ],
 
-  validtorBodyCreateAdmin: [
-    body("name").trim().notEmpty().isLength({ min: 4, max: 32 }),
-    body("lastName").trim().notEmpty().isLength({ min: 4, max: 52 }),
-    body("email").trim().notEmpty().isLength({ min: 4, max: 52 }).isEmail(),
-    body("password").trim().notEmpty().isLength({ min: 10, max: 32 }),
-  ],
-
-  validtorBodyReclaim: [
+  reclaim: [
     body("id")
       .trim()
       .notEmpty()
       .custom((value) => !Number.isNaN(value)),
   ],
 
-  validatorParamsId: param("id").trim().notEmpty().isInt(),
+  id: param("id").trim().notEmpty().isInt(),
 
-  validatorDate: [
+  date: [
     body("start_time").exists().withMessage("Start date is required"),
     body("end_time").exists().withMessage("End date is required"),
     body("end_time")

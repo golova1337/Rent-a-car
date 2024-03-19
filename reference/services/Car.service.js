@@ -1,4 +1,4 @@
-const CarAccess = require("../../db/query/car/Car.Access");
+const CarAccess = require("../db/repository/Car.repository");
 
 class CarService {
   constructor(knex) {

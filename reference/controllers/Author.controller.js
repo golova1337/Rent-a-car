@@ -1,4 +1,4 @@
-const UserService = require("../services/User.service");
+const AuthorService = require("../services/Author.service");
 
 /**
  * @swagger
@@ -170,33 +170,33 @@ const UserService = require("../services/User.service");
  *           type: string
  *           example: "verification was unsuccessful"
  */
-class UsersController {
-  constructor(userService) {
-    this.userService = userService;
+class AuthorController {
+  constructor(authorService) {
+    this.authorService = authorService;
   }
 
+  // регестрація юзера та занесення його в бд БЕЗ видачі JWT
   /**
    * @swagger
-   * /creation:
+   * /:
    *   post:
-   *     summary: Create an admin (accessible only for SuperAdmin)
+   *     summary: "Register a new user and obtain a JSON Web Token (JWT)"
+   *     tags:
+   *       - user
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
    *             $ref: "#/components/schemas/BodyObjectSignUp"
-   *     security:
-   *       - JWT: []
-   *     tags:
-   *       - user
    *     responses:
    *       '201':
-   *         description: Admin created successfully
+   *         description: User registered successfully
    *         content:
    *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/ResponseObjectCreateAdmin"
+   *             example:
+   *               message: "was created."
+   *               id: "id"
    *       '400':
    *         description: Bad Request, invalid data. Please review the property values.
    *         content:
@@ -207,22 +207,24 @@ class UsersController {
    *                 value:
    *                   error: "Invalid value: password or another property"
    *               example2:
-   *                 summary: Admin already exists
+   *                 summary: User already exists
    *                 value:
-   *                   error: "Admin already exists"
-   *       '401':
-   *         description: verefication was unsuccessful
+   *                   error: "User with this email already exists"
+   *       '500':
+   *         description: User already exists.
    *         content:
    *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
+   *             examples:
+   *               example1:
+   *                 summary: User already exists
+   *                 value:
+   *                   error: "User with this email already exists"
    */
-  // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
-  async create(req, res) {
-    const body = req.body;
+  async signUp(req, res) {
     try {
-      await this.userService.singUp({ ...body, role: "admin" });
-      return res.status(201).json({ message: "admin was created" }).end();
+      const body = req.body;
+      await this.authorService.singUp({ ...body, role: "user" });
+      return res.status(201).json({ message: "user was created" }).end();
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -230,100 +232,62 @@ class UsersController {
 
   /**
    * @swagger
-   * /:id:
-   *   delete:
-   *     summary: "Admin can delete a user"
+   * /login:
+   *   post:
+   *     summary: Login a user and obtain a JSON Web Token (JWT)
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               password:
+   *                 type: string
+   *                 maxLength: 32
+   *                 minLength: 10
+   *                 example: "qwerty12345"
+   *               email:
+   *                 type: string
+   *                 format: email
+   *                 example: "vasyapupkin@gmail.com"
+   *             required:
+   *               - email
+   *               - password
    *     tags:
    *       - user
-   *     parameters:
-   *       - $ref: "#/components/parameters/DeleteUser"
-   *     security:
-   *       - JWT: []
    *     responses:
    *       '200':
-   *         description: User was deleted
+   *         description: User login successfully
    *         content:
    *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 "user's email":
-   *                   type: string
-   *                   example: "was deleted"
+   *             example:
+   *               message: "You logged on into the account. JWT received."
+   *               id: "id"
    *       '401':
-   *         description: Verification was unsuccessful
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
-   *       '500':
-   *         description: Verification was unsuccessful
+   *         description: Bad Request, invalid data or email is wrong.
    *         content:
    *           application/json:
    *             examples:
    *               example1:
    *                 summary: Invalid data
    *                 value:
-   *                   ReferenceError: email is not defined
-   */
-  // Видалення користувачів (Soft Delete) - адмін
-  async delete(req, res) {
-    try {
-      const id = req.params.id;
-      await this.userService.delete(id);
-      return res.status(200).json({ message: "was deleted" });
-    } catch (error) {
-      return res.status(500).json({ message: "Internal Server Error" }).end();
-    }
-  }
-
-  /**
-   * @swagger
-   * /all-users:
-   *   get:
-   *     summary: "Get all users only admin"
-   *     tags:
-   *       - user
-   *     security:
-   *       - JWT: []
-   *     parameters:
-   *       - name: role
-   *         in: query
-   *         description: "user's role"
-   *         required: true
-   *     responses:
-   *       '200':
-   *         description: "Admin get all users (employees)"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/GetALLUsers"
-   *       '401':
-   *         description: "Verification was unsuccessful"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
-   *       '400':
-   *         description: "Enter the date"
-   *         content:
-   *           application/json:
-   *             examples:
-   *               example1:
-   *                 summary: "You did not enter the date"
+   *                   error: "Password is wrong"
+   *               example2:
+   *                 summary: User does not exist
    *                 value:
-   *                   "error": "enter the role"
+   *                   error: "User does not exist"
    */
-
-  // Можливість бачити всіх користувачівб додав вибор по роли щоб можно було і працівників отримувати - адмін
-  async getAll(req, res) {
+  // вхід та видача JWT с  ролью юзера
+  async login(req, res) {
     try {
-      const role = req.query.role;
-      const result = await this.userService.getAll(role);
-      return res.status(200).json({ list: result }).end();
+      const user = req.user;
+      const body = req.body;
+      const token = await this.authorService.login({ ...body, ...user });
+      return res.status(200).json({ token: token }).end();
     } catch (error) {
-      return res.status(500).json(error.message);
+      return res.status(500).json({ error: error.message });
     }
   }
 }
-module.exports = new UsersController(UserService);
+module.exports = new AuthorController(AuthorService);
