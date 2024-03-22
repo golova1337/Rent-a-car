@@ -1,6 +1,4 @@
 const CarService = require("../services/Car.service");
-const { err } = require("../middlewares/errors/error500");
-
 /**
  * @swagger
  * /cars/creation-car:
