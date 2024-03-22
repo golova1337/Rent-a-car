@@ -1,7 +1,7 @@
 const express = require("express");
 const cars = express.Router(); // имя роутера
 const Jwt = require("../middlewares/jwt/jwt");
-const { carValidator } = require("../helpers/validator/car.validator");
+const { carValidator } = require("../middlewares/validator/car.validator");
 const CarsController = require("../controllers/Cars.controller");
 
 // Можливість бачити які автівки зараз доступні для прокату - користувач і адмін. // обєднаті з фільтрацєю

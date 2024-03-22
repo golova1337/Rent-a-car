@@ -1,6 +1,6 @@
 const express = require("express");
 const users = express.Router();
-const { userValidator } = require("../helpers/validator/user.validator");
+const { userValidator } = require("../middlewares/validator/user.validator");
 const Jwt = require("../middlewares/jwt/jwt");
 const UsersController = require("../controllers/Users.controller");
 
