@@ -1,4 +1,4 @@
-const AuthorService = require("../services/Author.service");
+const AuthService = require("../services/Auth.service");
 
 /**
  * @swagger
@@ -171,10 +171,6 @@ const AuthorService = require("../services/Author.service");
  *           example: "verification was unsuccessful"
  */
 class AuthorController {
-  constructor(authorService) {
-    this.authorService = authorService;
-  }
-
   // регестрація юзера та занесення його в бд БЕЗ видачі JWT
   /**
    * @swagger
@@ -220,13 +216,13 @@ class AuthorController {
    *                 value:
    *                   error: "User with this email already exists"
    */
-  async signUp(req, res) {
+  async signUp(req, res, next) {
     try {
       const body = req.body;
-      await this.authorService.singUp({ ...body, role: "user" });
-      return res.status(201).json({ message: "user was created" }).end();
+      const result = await AuthService.singUp({ ...body, role: "user" });
+      return res.status(201).json({ message: result });
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      next(error);
     }
   }
 
@@ -278,16 +274,16 @@ class AuthorController {
    *                 value:
    *                   error: "User does not exist"
    */
-  // вхід та видача JWT с  ролью юзера
-  async login(req, res) {
+  // вхід та видача JWT с  ролью юзера,next
+  async login(req, res, next) {
     try {
       const user = req.user;
       const body = req.body;
-      const token = await this.authorService.login({ ...body, ...user });
-      return res.status(200).json({ token: token }).end();
+      const result = await AuthService.login({ ...body, ...user });
+      return res.status(200).json({ message: result }).end();
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      next(error);
     }
   }
 }
-module.exports = new AuthorController(AuthorService);
+module.exports = new AuthorController();

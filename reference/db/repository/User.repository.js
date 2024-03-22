@@ -6,13 +6,13 @@ class UserRepository {
   }
 
   async insert(body) {
-      const id = await this.knex.(TABLES.USERS).insert({
-        name: body.name,
-        lastname: body.lastname,
-        email: body.email,
-        role: body.role,
-        password_hash: body.hash,
-      })
+    const id = await this.knex(TABLES.USERS).insert({
+      name: body.name,
+      lastname: body.lastname,
+      email: body.email,
+      role: body.role,
+      password_hash: body.hash,
+    });
   }
 
   async delete(id) {

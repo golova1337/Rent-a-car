@@ -1,6 +1,5 @@
-const { knex } = require("../db/config/connection");
 const CarService = require("../services/Car.service");
-const carService = new CarService(knex);
+const { err } = require("../middlewares/errors/error500");
 
 /**
  * @swagger
@@ -33,13 +32,56 @@ const carService = new CarService(knex);
  */
 // создания авто с занесением его в таблицу cars доступно только админу
 class CarsController {
-  static async create(req, res) {
+  /**
+   * @swagger
+   * /:
+   *   get:
+   *     summary: "Get all cars"
+   *     tags:
+   *       - car
+   *     security:
+   *       - JWT: []
+   *     responses:
+   *       '200':
+   *         description: "Get all cars"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/RequestObjectCreateAuto"
+   *       '401':
+   *         description: "Verification was unsuccessful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/UnauthorizedError"
+   *       '500':
+   *         description: "Filtering unsuccessful"
+   *         content:
+   *           application/json:
+   *             examples:
+   *               example1:
+   *                 summary: "Internal Server Error"
+   *                 value:
+   *                   message:'Internal Server Error'
+   */
+  // Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
+  async get(req, res, next) {
+    try {
+      const filters = req.query;
+      const result = await CarService.get(filters);
+      return res.status(200).json({ massage: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async create(req, res, next) {
     try {
       const body = req.body;
-      await carService.insert(body);
+      await CarService.insert(body);
       return res.status(201).json({ message: body }).end();
     } catch (error) {
-      return res.status(500).json({ message: "Internal Server Error" });
+      next(error);
     }
   }
 
@@ -83,13 +125,13 @@ class CarsController {
    *               $ref: "#/components/schemas/UnauthorizedError"
    */
   // удаление авто с таблицы cars доступно только админу
-  static async delete(req, res) {
+  async delete(req, res, next) {
     try {
       const id = req.params.id;
-      await carService.delete(id);
+      await CarService.delete(id);
       return res.status(200).json({ message: `Car  was deleted` }).end();
     } catch (error) {
-      return res.status(500).json({ message: "Internal Server Error" }).end();
+      next(error);
     }
   }
 
@@ -122,55 +164,12 @@ class CarsController {
    *               $ref: "#/components/schemas/UnauthorizedError"
    */
   // Можливість бачити які автівки зараз в прокату -  адмін
-  static async lease(req, res) {
+  async lease(req, res, next) {
     try {
-      const result = await carService.lease();
+      const result = await CarService.lease();
       return res.status(200).json({ message: result }).end();
     } catch (error) {
-      return res.status(500).json({ message: "Internal Server Error" }).end();
-    }
-  }
-
-  /**
-   * @swagger
-   * /:
-   *   get:
-   *     summary: "Get all cars"
-   *     tags:
-   *       - car
-   *     security:
-   *       - JWT: []
-   *     responses:
-   *       '200':
-   *         description: "Get all cars"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/RequestObjectCreateAuto"
-   *       '401':
-   *         description: "Verification was unsuccessful"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
-   *       '500':
-   *         description: "Filtering unsuccessful"
-   *         content:
-   *           application/json:
-   *             examples:
-   *               example1:
-   *                 summary: "Internal Server Error"
-   *                 value:
-   *                   message:'Internal Server Error'
-   */
-  // Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
-  static async get(req, res) {
-    try {
-      const filters = req.query;
-      const result = await carService.get(filters);
-      return res.status(200).json({ massage: result });
-    } catch (error) {
-      return res.status(500).json({ error: "Internal Server Error" });
+      next(error);
     }
   }
 
@@ -228,13 +227,13 @@ class CarsController {
    *                   message:'Internal Server Error'
    */
   // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
-  static async search(req, res) {
+  async search(req, res, next) {
     try {
       const substring = req.query;
-      const result = await carService.search(substring);
+      const result = await CarService.search(substring);
       return res.status(200).json({ massage: result });
     } catch (error) {
-      return res.status(500).json({ message: "Internal Server Error" });
+      next(error);
     }
   }
 
@@ -298,13 +297,13 @@ class CarsController {
    */
 
   // аренда машин
-  static async rent(req, res) {
+  async rent(req, res, next) {
     try {
       const body = req.body;
-      const result = await carService.rent({ ...body, user_id: req.user.id });
-      return res.status(200).json({ message: "You have rented successfully.", leaseId: result }).end();
+      const result = await CarService.rent({ ...body, user_id: req.user.id });
+      return res.status(200).json({ message: "You have rented successfully.", numberId: result }).end();
     } catch (error) {
-      return res.status(500).json({ message: error.message });
+      next(error);
     }
   }
 
@@ -356,15 +355,16 @@ class CarsController {
    */
 
   // возврат авто с аренды только админ может делать
-  static async reclaim(req, res) {
+  async reclaim(req, res, next) {
     try {
+      const userId = req.user.id;
       const id = req.params.id;
-      await carService.reclaim(id);
+      await CarService.reclaim({ id, userId });
       return res.status(200).json({ lease: `${req.params.id} is finished` });
     } catch (error) {
-      return res.status(400).json({ message: error.message });
+      next(error);
     }
   }
 }
 
-module.exports = CarsController;
+module.exports = new CarsController();

@@ -1,28 +1,24 @@
 const UserRepository = require("../db/repository/User.repository");
-const { hashingPassword } = require("../utils/bcrypt/password");
+const { hashingPassword } = require("../helpers/auth/password");
 
 class UserService {
-  constructor(userRepository) {
-    this.userRepository = userRepository;
-  }
-
   async singUp(body) {
     try {
       const hash = await hashingPassword(body.password);
-      await this.userRepository.insert({ ...body, hash: hash });
+      await UserRepository.insert({ ...body, hash: hash });
     } catch (error) {
       throw new Error(error.message);
     }
   }
 
   async delete(id) {
-    await this.userRepository.delete(id);
+    await UserRepository.delete(id);
   }
 
   async getAll(role) {
-    const result = await this.userRepository.getAll(role);
+    const result = await UserRepository.getAll(role);
     return result;
   }
 }
 
-module.exports = new UserService(UserRepository);
+module.exports = new UserService();

@@ -1,8 +1,9 @@
 const { TABLES } = require("../config/tablesCars");
+const { knex } = require("../config/connection");
 
-class CarAccess {
-  constructor(knex) {
-    this.knex = knex;
+class CarRepository {
+  constructor(connection) {
+    this.knex = connection;
   }
 
   async insert(body) {
@@ -14,52 +15,39 @@ class CarAccess {
   }
 
   async lease() {
-    const result = await this.knex(TABLES.CARS).select("*").where({ status: "in_rent" });
-    return result;
+    return this.knex(TABLES.CARS).select("*").where({ status: "in_rent" });
   }
 
   async get(filters) {
-    const data = {};
-    if (!Object.keys(filters).length) {
-      const result = await this.knex(TABLES.CARS).select("*").where({ status: "not_in_rent" });
-      return result;
-    }
-
-    Object.keys(filters).forEach((key) => {
-      if (filters[key].trim().length !== 0) {
-        data[key] = filters[key];
-      }
-    });
-    const query = this.knex(TABLES.CARS).select("*").where({ status: "not_in_rent" });
-    if (Object.keys(data).length) {
-      query.where(data);
-    }
-
-    const result = await query;
-    return result;
+    return this.knex(TABLES.CARS).select("*").where(filters);
   }
 
   async search(substring) {
     const query = this.knex(TABLES.CARS).select("*");
 
-    if (substring.brand && substring.brand.trim().length !== 0) {
+    if (substring.brand) {
       query.whereILike("brand", `%${substring.brand}%`);
     }
 
-    if (substring.model && substring.model.trim().length !== 0) {
+    if (substring.model) {
       query.andWhereILike("model", `%${substring.model}%`);
     }
+    query.where({ status: "not_in_rent" });
     const result = await query;
     return result;
+  }
+
+  async checkActiveLease(id) {
+    return this.knex(TABLES.LEASE).select("*").where({ user_id: id }).orderBy("start_time", "desc").limit(1);
+  }
+  
+  async checkLeaseExist(id) {
+    return this.knex(TABLES.LEASE).select("*").where({ id: id }).orderBy("start_time", "desc").limit(1);
   }
 
   async rent(body) {
     const trx = await this.knex.transaction();
     try {
-      const result = await trx(TABLES.LEASE).select("*").where({ user_id: body.user_id }).orderBy("start_time", "desc").limit(1);
-      if (result.length > 0 && result[0].status === "active") {
-        throw new Error("you are renting");
-      }
       const leaseId = await trx(TABLES.LEASE).insert(body);
       await trx(TABLES.CARS).where({ id: body.car_id }).update({ status: "in_rent" });
       await trx.commit();
@@ -70,14 +58,11 @@ class CarAccess {
     }
   }
 
-  async reclaim(id) {
-    const end = new Date();
+  async reclaim(data) {
     const trx = await this.knex.transaction();
     try {
-      const result = await trx(TABLES.LEASE).select("*").where({ id: id });
-      if (result[0].status === "inactive") throw new Error("it's inactive");
-      await trx(TABLES.LEASE).where({ id: id }).update({ status: "inactive", end_time: end });
-      await trx(TABLES.CARS).where({ id: result[0].car_id }).update({ status: "not_in_rent" });
+      await trx(TABLES.LEASE).where({ id: data.id }).update({ status: "inactive", end_time: data.end });
+      await trx(TABLES.CARS).where({ id: data.carId }).update({ status: "not_in_rent" });
       await trx.commit();
     } catch (error) {
       await trx.rollback();
@@ -85,5 +70,4 @@ class CarAccess {
     }
   }
 }
-
-module.exports = CarAccess;
+module.exports = new CarRepository(knex);

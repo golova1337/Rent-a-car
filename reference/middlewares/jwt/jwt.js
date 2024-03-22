@@ -1,12 +1,14 @@
-const { verifyJwt } = require("../../utils/jwt/verifyJwt");
+const jwtHelper = require("../../helpers/jwt/jwt.helper");
 
 class Jwt {
-  static check(req, res, next) {
-    if (!req.headers.authorization) {
-      return res.status(401).json({ message: "Authorization header is missing" });
-    }
+  check(req, res, next) {
+    const token = req.headers.authorization;
     try {
-      const decoded = verifyJwt(req.headers.authorization);
+      if (!token || !token.split(" ")[0]) {
+        return res.status(401).json({ message: "Authorization header is missing" });
+      }
+      const authToken = req.headers.authorization.split(" ")[1];
+      const decoded = jwtHelper.verifyJwt(authToken);
       req.user = decoded;
       next();
     } catch (error) {
@@ -14,7 +16,7 @@ class Jwt {
     }
   }
 
-  static Role(roles) {
+  Role(roles) {
     return (req, res, next) => {
       if (roles.includes(req.user.role)) {
         next();
@@ -25,4 +27,4 @@ class Jwt {
   }
 }
 
-module.exports = Jwt;
+module.exports = new Jwt();

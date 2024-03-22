@@ -1,6 +1,6 @@
 const { body, param, validationResult } = require("express-validator");
 
-const validator = {
+const carValidator = {
   create: [
     body("brand").trim().notEmpty().isLength({ min: 2, max: 20 }),
     body("model").trim().notEmpty().isLength({ min: 2, max: 20 }),
@@ -16,14 +16,9 @@ const validator = {
       .custom((value) => !Number.isNaN(value)),
   ],
 
-  reclaim: [
-    body("id")
-      .trim()
-      .notEmpty()
-      .custom((value) => !Number.isNaN(value)),
-  ],
+  idBody: [body("car_id").trim().notEmpty().isInt()],
 
-  id: param("id").trim().notEmpty().isInt(),
+  idParam: [param("id").trim().notEmpty().isInt()],
 
   date: [
     body("start_time").exists().withMessage("Start date is required"),
@@ -40,10 +35,10 @@ const validator = {
   validationResult: (req, res, next) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
-      return res.status(400).json({ [result.errors[0].msg]: result.errors[0].path });
+      return res.status(422).json({ [result.errors[0].msg]: result.errors[0].path });
     }
     next();
   },
 };
 
-module.exports = { validator };
+module.exports = { carValidator };

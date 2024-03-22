@@ -1,7 +1,7 @@
 const { body, param, validationResult } = require("express-validator");
-const authorService = require("../../db/repository/Author.repository");
+const authorService = require("../../db/repository/Auth.repository");
 
-const validator = {
+const userValidator = {
   singUP: [
     body("name").trim().notEmpty().isLength({ min: 4, max: 32 }),
     body("lastname").trim().notEmpty().isLength({ min: 4, max: 52 }),
@@ -13,7 +13,7 @@ const validator = {
       .custom(async (value) => {
         const user = await authorService.checkByEmail(value);
         if (user) {
-          throw new Error("Conflict");
+          throw new Error();
         }
       }),
     body("password").trim().notEmpty().isLength({ min: 10, max: 32 }),
@@ -28,7 +28,7 @@ const validator = {
       .custom(async (value, { req }) => {
         const user = await authorService.checkByEmail(value);
         if (!user) {
-          throw new Error("Conflict");
+          throw new Error();
         }
         req.user = user;
       }),
@@ -40,10 +40,10 @@ const validator = {
   validationResult: (req, res, next) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
-      return res.status(400).json({ [result.errors[0].msg]: result.errors[0].path });
+      return res.status(400).json({ error: "BadRequest" });
     }
     next();
   },
 };
 
-module.exports = { validator };
+module.exports = { userValidator };

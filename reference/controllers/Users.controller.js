@@ -171,10 +171,6 @@ const UserService = require("../services/User.service");
  *           example: "verification was unsuccessful"
  */
 class UsersController {
-  constructor(userService) {
-    this.userService = userService;
-  }
-
   /**
    * @swagger
    * /creation:
@@ -218,13 +214,13 @@ class UsersController {
    *               $ref: "#/components/schemas/UnauthorizedError"
    */
   // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
-  async create(req, res) {
+  async create(req, res, next) {
     const body = req.body;
     try {
-      await this.userService.singUp({ ...body, role: "admin" });
+      await UserService.singUp({ ...body, role: "admin" });
       return res.status(201).json({ message: "admin was created" }).end();
     } catch (error) {
-      return res.status(500).json({ error: error.message });
+      next(error);
     }
   }
 
@@ -267,13 +263,13 @@ class UsersController {
    *                   ReferenceError: email is not defined
    */
   // Видалення користувачів (Soft Delete) - адмін
-  async delete(req, res) {
+  async delete(req, res, next) {
     try {
       const id = req.params.id;
-      await this.userService.delete(id);
+      await UserService.delete(id);
       return res.status(200).json({ message: "was deleted" });
     } catch (error) {
-      return res.status(500).json({ message: "Internal Server Error" }).end();
+      next(error);
     }
   }
 
@@ -316,14 +312,14 @@ class UsersController {
    */
 
   // Можливість бачити всіх користувачівб додав вибор по роли щоб можно було і працівників отримувати - адмін
-  async getAll(req, res) {
+  async getAll(req, res, next) {
     try {
       const role = req.query.role;
-      const result = await this.userService.getAll(role);
+      const result = await UserService.getAll(role);
       return res.status(200).json({ list: result }).end();
     } catch (error) {
-      return res.status(500).json(error.message);
+      next(error);
     }
   }
 }
-module.exports = new UsersController(UserService);
+module.exports = new UsersController();
