@@ -3,21 +3,49 @@ const { hashingPassword } = require("../helpers/auth/password");
 
 class UserService {
   async singUp(body) {
-    try {
-      const hash = await hashingPassword(body.password);
-      await UserRepository.insert({ ...body, hash: hash });
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const hash = await hashingPassword(body.password);
+    await UserRepository.insert({ ...body, hash: hash });
+    return {
+      status: true,
+      message: "Registration successful",
+      data: {
+        email: body.email,
+        name: body.name,
+      },
+    };
   }
 
   async delete(id) {
     await UserRepository.delete(id);
+    return {
+      status: true,
+      message: "Deletion successful",
+      data: {
+        id: id,
+      },
+    };
   }
 
   async getAll(role) {
-    const result = await UserRepository.getAll(role);
-    return result;
+    let result;
+    if (!role || !role.trim().length) {
+      result = await UserRepository.getAll("user");
+      return {
+        status: true,
+        message: "Get successful",
+        data: {
+          result: result,
+        },
+      };
+    }
+    result = await UserRepository.getAll(role);
+    return {
+      status: true,
+      message: "Get successful",
+      data: {
+        result: result,
+      },
+    };
   }
 }
 

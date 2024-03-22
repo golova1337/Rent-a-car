@@ -1,4 +1,5 @@
 const UserService = require("../services/User.service");
+const Responses = require("../utils/response");
 
 /**
  * @swagger
@@ -217,8 +218,9 @@ class UsersController {
   async create(req, res, next) {
     const body = req.body;
     try {
-      await UserService.singUp({ ...body, role: "admin" });
-      return res.status(201).json({ message: "admin was created" }).end();
+      const result = await UserService.singUp({ ...body, role: "admin" });
+      const { message, data } = result;
+      return res.status(201).json(Responses.successResponse(message, data)).end();
     } catch (error) {
       next(error);
     }
@@ -266,8 +268,9 @@ class UsersController {
   async delete(req, res, next) {
     try {
       const id = req.params.id;
-      await UserService.delete(id);
-      return res.status(200).json({ message: "was deleted" });
+      const result = await UserService.delete(id);
+      const { message, data } = result;
+      return res.status(200).json(Responses.successResponse(message, data));
     } catch (error) {
       next(error);
     }
@@ -316,7 +319,8 @@ class UsersController {
     try {
       const role = req.query.role;
       const result = await UserService.getAll(role);
-      return res.status(200).json({ list: result }).end();
+      const { message, data } = result;
+      return res.status(200).json(Responses.successResponse(message, data)).end();
     } catch (error) {
       next(error);
     }

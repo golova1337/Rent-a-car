@@ -1,4 +1,5 @@
 const AuthService = require("../services/Auth.service");
+const Responses = require("../utils/response");
 
 /**
  * @swagger
@@ -220,7 +221,8 @@ class AuthorController {
     try {
       const body = req.body;
       const result = await AuthService.singUp({ ...body, role: "user" });
-      return res.status(201).json({ message: result });
+      const { message, data } = result;
+      return res.status(201).json(Responses.successResponse(message, data));
     } catch (error) {
       next(error);
     }
@@ -280,7 +282,8 @@ class AuthorController {
       const user = req.user;
       const body = req.body;
       const result = await AuthService.login({ ...body, ...user });
-      return res.status(200).json({ message: result }).end();
+      const { message, data } = result;
+      return res.status(200).json(Responses.successResponse(message, data)).end();
     } catch (error) {
       next(error);
     }

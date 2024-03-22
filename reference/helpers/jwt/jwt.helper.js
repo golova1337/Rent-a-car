@@ -10,7 +10,7 @@ class JwtHelper {
   }
 
   verifyJwt(token) {
-    const decoded = jwt.verify(token, SecretKey);
+    const decoded = jwt.verify(token, process.env.SECRET_KEY_FOR_JWT);
     return decoded;
   }
 }

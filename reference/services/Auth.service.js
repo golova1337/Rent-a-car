@@ -6,15 +6,30 @@ class AuthService {
   async singUp(body) {
     const hash = await hashingPassword(body.password);
     await authRepository.insert({ ...body, hash: hash });
-    const { password, ...data } = body;
-    return data;
+    return {
+      status: true,
+      message: "Authentication successfull",
+      data: {
+        email: body.email,
+        name: body.name,
+      },
+    };
   }
 
   async login(body) {
     await comparePassword(body.password, body.password_hash);
     const token = await jwtHelper.createJwt(body.id, body.role);
-    const { password_hash, password, id, ...data } = body;
-    return { ...data, token: token };
+    return {
+      status: true,
+      message: "Authentication successfull",
+      data: {
+        id: body.id,
+        email: body.email,
+        name: body.name,
+        role: body.role,
+        token: token,
+      },
+    };
   }
 }
 

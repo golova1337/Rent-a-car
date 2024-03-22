@@ -24,11 +24,12 @@ class UserRepository {
   }
 
   async getAll(role) {
-    const getAll = await this.knex.select("id", "name", "lastname", "email").from(TABLES.USERS).where({
+    // console.log(role);
+    const result = await this.knex.select("id", "name", "lastname", "email").from(TABLES.USERS).where({
       role: role,
       is_deleted: false,
     });
-    return getAll;
+    return result;
   }
 }
 module.exports = new UserRepository(knex);
