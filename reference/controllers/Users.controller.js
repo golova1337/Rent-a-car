@@ -216,13 +216,23 @@ class UsersController {
    */
   // Створення адмінів - суперадміном (повинен бути присутнім в єдиному екзмеплярі)
   async create(req, res, next) {
+    // data for run the service
     const body = req.body;
     try {
+      // the service
       const result = await UserService.singUp({ ...body, role: "admin" });
-      const { message, data } = result;
-      return res.status(201).json(Responses.successResponse(message, data)).end();
+      const { message, data, meta } = result;
+
+      // response
+      return res.status(201).json(Responses.successResponse({ message, data, meta })).end();
     } catch (error) {
-      next(error);
+      // if there is a custom error
+      if (error.status) {
+        res.status(error.status).json(Responses.errorResponse(error));
+      } else {
+        // 500 error
+        next(error);
+      }
     }
   }
 
@@ -266,13 +276,23 @@ class UsersController {
    */
   // Видалення користувачів (Soft Delete) - адмін
   async delete(req, res, next) {
+    // data for run the service
+    const id = req.params.id;
     try {
-      const id = req.params.id;
+      // the sertvice
       const result = await UserService.delete(id);
-      const { message, data } = result;
-      return res.status(200).json(Responses.successResponse(message, data));
+
+      // data for res
+      const { message, data, meta } = result;
+
+      // response
+      return res.status(200).json(Responses.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Responses.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -316,13 +336,46 @@ class UsersController {
 
   // Можливість бачити всіх користувачівб додав вибор по роли щоб можно було і працівників отримувати - адмін
   async getAll(req, res, next) {
+    // data for run the service
+    const role = req.query.role;
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 10;
+
     try {
-      const role = req.query.role;
-      const result = await UserService.getAll(role);
-      const { message, data } = result;
-      return res.status(200).json(Responses.successResponse(message, data)).end();
+      // the service
+      const { message, data, meta } = await UserService.getAll({ role, page, perPage });
+
+      // response
+      return res.status(200).json(Responses.successResponse({ message, data, meta })).end();
     } catch (error) {
-      next(error);
+      // if there is a custom error
+      if (error.status) {
+        res.status(error.status).json(Responses.errorResponse(error));
+      } else {
+        // 500 error
+        next(error);
+      }
+    }
+  }
+
+  async getOne(req, res, next) {
+    // data for run the service
+    const id = req.params.id;
+
+    try {
+      // the service
+      const { message, data, meta } = await UserService.getOne(id);
+
+      // response
+      return res.status(200).json(Responses.successResponse({ message, data, meta })).end();
+    } catch (error) {
+      // if there is a custom error
+      if (error.status) {
+        res.status(error.status).json(Responses.errorResponse(error));
+      } else {
+        // 500 error
+        next(error);
+      }
     }
   }
 }

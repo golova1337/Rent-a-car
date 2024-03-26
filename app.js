@@ -15,9 +15,9 @@ const Port = 5500;
 
 app.use(express.json());
 
-app.use("/", authRouter);
-app.use("/users", usersRouter);
-app.use("/cars", carsRouter);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/cars", carsRouter);
 app.use(error500Middleware);
 
 process.on("SIGINT", async () => {

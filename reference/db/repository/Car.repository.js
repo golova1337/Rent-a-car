@@ -38,11 +38,12 @@ class CarRepository {
   }
 
   async checkActiveLease(id) {
-    return this.knex(TABLES.LEASE).select("*").where({ user_id: id }).orderBy("start_time", "desc").limit(1);
+    const result = await this.knex(TABLES.LEASE).select("*").where({ user_id: id }).orderBy("start_time", "desc").limit(1);
+    return result.length > 0 && result[0].status === "active";
   }
-  
+
   async checkLeaseExist(id) {
-    return this.knex(TABLES.LEASE).select("*").where({ id: id }).orderBy("start_time", "desc").limit(1);
+    return this.knex(TABLES.LEASE).select("*").where({ id: id });
   }
 
   async rent(body) {

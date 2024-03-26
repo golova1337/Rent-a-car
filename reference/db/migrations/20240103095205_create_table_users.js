@@ -11,7 +11,6 @@ exports.up = function (knex) {
     table.string("password_hash").notNullable();
     table.enu("role", ["user", "admin", "superadmin"]).notNullable();
     table.timestamps(true, true);
-    table.boolean("is_deleted").defaultTo(false);
     table.timestamp("deleted_at").nullable();
   });
 };

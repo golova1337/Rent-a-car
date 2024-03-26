@@ -1,11 +1,12 @@
 const { TABLES } = require("../config/tablesUsers");
 const { knex } = require("../config/connection");
+
 class AuthRepository {
   constructor(connection) {
     this.knex = connection;
   }
 
-  insert(body) {
+  async insert(body) {
     return this.knex(TABLES.USERS).insert({
       name: body.name,
       lastname: body.lastname,
@@ -15,8 +16,8 @@ class AuthRepository {
     });
   }
 
-  async checkByEmail(email) {
-    const userData = await this.knex.select("name", "lastname", "role", "password_hash", "id").from(TABLES.USERS).where({ email });
+  async getByEmail(email) {
+    const userData = await this.knex.select("name", "lastname", "role", "password_hash", "id", "deleted_at").from(TABLES.USERS).where({ email: email });
     return userData[0];
   }
 }

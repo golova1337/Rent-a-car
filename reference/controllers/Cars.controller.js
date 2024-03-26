@@ -1,4 +1,6 @@
 const CarService = require("../services/Car.service");
+const Response = require("../utils/response");
+
 /**
  * @swagger
  * /cars/creation-car:
@@ -64,22 +66,39 @@ class CarsController {
    */
   // Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
   async get(req, res, next) {
+    // data for run the service
+    const filters = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 10;
     try {
-      const filters = req.query;
-      const result = await CarService.get(filters);
-      return res.status(200).json({ massage: result });
+      // the service
+      const { message, data, meta } = await CarService.get(filters, page, perPage);
+      // response
+      return res.status(200).json(Response.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Response.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 
   async create(req, res, next) {
+    // data for run the srvice
+    const body = req.body;
     try {
-      const body = req.body;
-      await CarService.insert(body);
-      return res.status(201).json({ message: body }).end();
+      // the service
+      const { message, data, meta } = await CarService.insert(body);
+
+      // response
+      return res.status(201).json(Response.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Response.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -124,12 +143,20 @@ class CarsController {
    */
   // удаление авто с таблицы cars доступно только админу
   async delete(req, res, next) {
+    // data for run the srvice
+    const id = req.params.id;
     try {
-      const id = req.params.id;
-      await CarService.delete(id);
-      return res.status(200).json({ message: `Car  was deleted` }).end();
+      // the service
+      const { message, data, meta } = await CarService.delete(id);
+
+      // response
+      return res.status(200).json(Response.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Response.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -163,11 +190,21 @@ class CarsController {
    */
   // Можливість бачити які автівки зараз в прокату -  адмін
   async lease(req, res, next) {
+    // data for run the service
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 10;
     try {
-      const result = await CarService.lease();
-      return res.status(200).json({ message: result }).end();
+      // the service
+      const { message, data, meta } = await CarService.lease(page, perPage);
+
+      // response
+      return res.status(200).json(Response.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Response.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -226,12 +263,22 @@ class CarsController {
    */
   // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
   async search(req, res, next) {
+    // data for run the service
+    const substring = req.query;
+    const page = parseInt(req.query.page, 10) || 1;
+    const perPage = parseInt(req.query.perPage, 10) || 10;
     try {
-      const substring = req.query;
-      const result = await CarService.search(substring);
-      return res.status(200).json({ massage: result });
+      // the service
+      const { message, data, meta } = await CarService.search(substring, page, perPage);
+
+      // response
+      return res.status(200).json(Response.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Response.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -296,12 +343,21 @@ class CarsController {
 
   // аренда машин
   async rent(req, res, next) {
+    // data for run the service
+    const body = req.body;
+    const user_id = req.user.id;
     try {
-      const body = req.body;
-      const result = await CarService.rent({ ...body, user_id: req.user.id });
-      return res.status(200).json({ message: "You have rented successfully.", numberId: result }).end();
+      // the service
+      const { message, data, meta } = await CarService.rent({ ...body, user_id });
+
+      // response
+      return res.status(200).json(Response.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Response.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 
@@ -354,13 +410,19 @@ class CarsController {
 
   // возврат авто с аренды только админ может делать
   async reclaim(req, res, next) {
+    const id = req.params.id;
     try {
-      const userId = req.user.id;
-      const id = req.params.id;
-      await CarService.reclaim({ id, userId });
-      return res.status(200).json({ lease: `${req.params.id} is finished` });
+      // the service
+      const { message, data, meta } = await CarService.reclaim(id);
+
+      // response
+      return res.status(200).json(Response.successResponse({ message, data, meta }));
     } catch (error) {
-      next(error);
+      if (error.status) {
+        res.status(error.status).json(Response.errorResponse(error));
+      } else {
+        next(error);
+      }
     }
   }
 }

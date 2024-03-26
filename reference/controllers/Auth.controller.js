@@ -4,196 +4,102 @@ const Responses = require("../utils/response");
 /**
  * @swagger
  * components:
- *   securitySchemes:
- *     JWT:
- *       type: apiKey
- *       in: header
- *       name: Authorization
- *       description: format JWT
- *
- *   parameters:
- *     DeleteUser:
- *       name: email
- *       in: query
- *       description: "user's email"
- *       required: true
- *       schema:
- *         type: string
- *
- *     DeleteCar:
- *       name: Number_plate
- *       in: query
- *       description: number_plate
- *       required: true
- *       schema:
- *         type: string
- *
- *     FilterCarBrand:
- *       in: query
- *       name: brand
- *       description: Brand car
- *       schema:
- *         type: string
- *
- *     FilterCarbrandModel:
- *       in: query
- *       name: model
- *       description: model car
- *       schema:
- *         type: string
- *
- *     FilterCarbrandYear:
- *       in: query
- *       name: year
- *       description: year of a car
- *       schema:
- *         type: integer
- *
- *     FilterCarbrandPrice:
- *       in: query
- *       name: price
- *       description: price of a car
- *       schema:
- *         type: string
- *
  *   schemas:
- *     ResponseObjectCreateAdmin:
- *       type: object
- *       properties:
- *         message:
- *           type: object
- *           properties:
- *             name:
- *               type: string
- *               maxLength: 32
- *               minLength: 4
- *               example: "Vasya"
- *             lastName:
- *               type: string
- *               maxLength: 32
- *               minLength: 4
- *               example: "Pupkin"
- *             role:
- *               type: string
- *               enum:
- *                 - admin
- *             email:
- *               type: string
- *               format: email
- *               example: "vasyapupkin@gmail.com"
- *
- *     BodyObjectSignUp:
+ *     ReqSignUp:
  *       type: object
  *       properties:
  *         name:
  *           type: string
  *           maxLength: 32
  *           minLength: 4
- *           example: "Vasya"
- *         lastName:
+ *           example: "Robin"
+ *         lastname:
  *           type: string
  *           maxLength: 32
  *           minLength: 4
- *           example: "Pupkin"
+ *           example: "Hood"
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "vasyapupkin@gmail.com"
  *         password:
  *           type: string
  *           maxLength: 32
  *           minLength: 10
  *           example: "qwerty12345"
+ * 
+ *     ResSignUp:
+ *       type: object
+ *       properties:
+ *         status:
+ *           example: true
+ *         message:
+ *           example: Registration successfull
+ *         data:
+ *           type: object
+ *           properties:
+ *             email:
+ *               example: robinhood@gmail.com
+ *             name:
+ *               example: robin
+ *         error:
+ *           example: null
+
+ *     ReqLogin:
+ *       type: object
+ *       properties:
  *         email:
  *           type: string
  *           format: email
  *           example: "vasyapupkin@gmail.com"
- *
- *     GetALLUsers:
+ *         password:
+ *           type: string
+ *           maxLength: 32
+ *           minLength: 10
+ *           example: "qwerty12345"
+ *     ResLogin:
  *       type: object
  *       properties:
- *         name:
- *           type: string
- *           description: "User's first name"
- *         lastName:
- *           type: string
- *           description: "User's last name"
- *         email:
- *           type: string
- *           format: email
- *           description: "User's email address"
- *       example:
- *         name: "Kseniya"
- *         lastName: "Kaplya"
- *         email: "kseniyaKaplya@gmail.com"
- *
- *     FilterAuto:
- *       type: object
- *       properties:
- *         Brand:
- *           type: string
- *           maxLength: 20
- *           minLength: 2
- *           example: "BMW"
- *         Model:
- *           type: string
- *           maxLength: 20
- *           minLength: 2
- *           example: "m5"
- *         Price:
- *           type: integer
- *           maxLength: 5
- *           minLength: 2
- *           example: 1500
- *         Year:
- *           type: integer
- *           maxLength: 4
- *           minLength: 4
- *           example: 2020
- *     RequestObjectCreateAuto:
- *       allOf:
- *         - $ref: "#/components/schemas/FilterAuto"
- *         - type: object
+ *         status: true
+ *         example: Authentication successfull
+ *         data:
+ *           type: object
  *           properties:
- *             Number:
- *              type: string
- *              maxLength: 20
- *              minLength: 2
- *              example: AX1337
- *     ResponseObjectCreateAuto:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *       example:
- *         message: "Car was created"
- *
- *     UnauthorizedError:
- *       type: object
- *       properties:
- *         message:
- *           type: string
- *           example: "verification was unsuccessful"
+ *             email:
+ *               type: string
+ *               example: robinhood.com
+ *             name:
+ *               type: string
+ *               example: robin
+ *             role:
+ *               type: string
+ *               example: user
+ *         error:
+ *           example: null
  */
+
 class AuthorController {
   // регестрація юзера та занесення його в бд БЕЗ видачі JWT
   /**
    * @swagger
    * /:
    *   post:
-   *     summary: "Register a new user and obtain a JSON Web Token (JWT)"
+   *     summary: "Registration a new user"
    *     tags:
-   *       - user
+   *       - authorization
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
-   *             $ref: "#/components/schemas/BodyObjectSignUp"
+   *             $ref: "#/components/schemas/ReqSignUp"
    *     responses:
    *       '201':
-   *         description: User registered successfully
+   *         description: registration successfully
    *         content:
    *           application/json:
-   *             example:
-   *               message: "was created."
-   *               id: "id"
+   *             schema:
+   *               $ref: "#/components/schemas/ResSignUp"
    *       '400':
    *         description: Bad Request, invalid data. Please review the property values.
    *         content:
@@ -202,28 +108,34 @@ class AuthorController {
    *               example1:
    *                 summary: Invalid data
    *                 value:
-   *                   error: "Invalid value: password or another property"
+   *                   error: "Invalid value"
    *               example2:
    *                 summary: User already exists
    *                 value:
-   *                   error: "User with this email already exists"
+   *                   error: "BadRequest"
    *       '500':
-   *         description: User already exists.
+   *         description: server error.
    *         content:
    *           application/json:
    *             examples:
    *               example1:
-   *                 summary: User already exists
+   *                 summary: Problems on the server
    *                 value:
-   *                   error: "User with this email already exists"
+   *                   error: "Internal Server Error"
    */
   async signUp(req, res, next) {
+    // data for run the service
+    const body = req.body;
     try {
-      const body = req.body;
-      const result = await AuthService.singUp({ ...body, role: "user" });
-      const { message, data } = result;
-      return res.status(201).json(Responses.successResponse(message, data));
+      // the service
+      const { message, data, meta } = await AuthService.singUp({ ...body, role: "user" });
+
+      // response
+      return res.status(201).json(Responses.successResponse({ message, data, meta }));
     } catch (error) {
+      if (error.status) {
+        return res.status(error.status).json(Responses.errorResponse(error));
+      }
       next(error);
     }
   }
@@ -233,36 +145,22 @@ class AuthorController {
    * /login:
    *   post:
    *     summary: Login a user and obtain a JSON Web Token (JWT)
+   *     tags:
+   *       - authorization
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
-   *             type: object
-   *             properties:
-   *               password:
-   *                 type: string
-   *                 maxLength: 32
-   *                 minLength: 10
-   *                 example: "qwerty12345"
-   *               email:
-   *                 type: string
-   *                 format: email
-   *                 example: "vasyapupkin@gmail.com"
-   *             required:
-   *               - email
-   *               - password
-   *     tags:
-   *       - user
+   *             $ref: "#/components/schemas/ReqLogin"
    *     responses:
    *       '200':
    *         description: User login successfully
    *         content:
    *           application/json:
-   *             example:
-   *               message: "You logged on into the account. JWT received."
-   *               id: "id"
-   *       '401':
+   *             schema:
+   *              $ref: "#/components/schemas/ResLogin"
+   *       '400':
    *         description: Bad Request, invalid data or email is wrong.
    *         content:
    *           application/json:
@@ -270,21 +168,36 @@ class AuthorController {
    *               example1:
    *                 summary: Invalid data
    *                 value:
-   *                   error: "Password is wrong"
+   *                   error: "Invalid data"
    *               example2:
    *                 summary: User does not exist
    *                 value:
-   *                   error: "User does not exist"
+   *                   error: "BadRequest"
+   *       '500':
+   *         description: server error.
+   *         content:
+   *           application/json:
+   *             examples:
+   *               example1:
+   *                 summary: Problems on the server
+   *                 value:
+   *                   error: "Internal Server Error"
    */
   // вхід та видача JWT с  ролью юзера,next
   async login(req, res, next) {
+    // data for run the srvice
+    const user = req.user;
+    const body = req.body;
     try {
-      const user = req.user;
-      const body = req.body;
-      const result = await AuthService.login({ ...body, ...user });
-      const { message, data } = result;
-      return res.status(200).json(Responses.successResponse(message, data)).end();
+      // the service
+      const { message, data, meta } = await AuthService.login({ ...body, ...user });
+
+      // response
+      return res.status(200).json(Responses.successResponse({ message, data, meta })).end();
     } catch (error) {
+      if (error.status) {
+        return res.status(error.status).json(Responses.errorResponse(error));
+      }
       next(error);
     }
   }

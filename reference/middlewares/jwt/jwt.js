@@ -1,16 +1,15 @@
-const jwtHelper = require("../../helpers/jwt/jwt.helper");
+const authHelpers = require("../../helpers/Auth.helpers");
 const createError = require("http-errors");
 
 class Jwt {
   check(req, res, next) {
     const token = req.headers.authorization;
-    console.log(token.split(" ")[0]);
     try {
       if (!token || !token.split(" ")[1]) {
         throw createError(401, "Unauthorized");
       }
       const authToken = req.headers.authorization.split(" ")[1];
-      const decoded = jwtHelper.verifyJwt(authToken);
+      const decoded = authHelpers.verifyJwt(authToken);
       req.user = decoded;
       next();
     } catch (error) {

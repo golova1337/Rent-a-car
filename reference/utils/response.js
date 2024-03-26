@@ -1,10 +1,11 @@
 class Responses {
-  successResponse(message, data) {
+  successResponse({ message, data, meta = {} }) {
     return {
       status: true,
       message,
-      data,
+      meta,
       error: null,
+      data,
     };
   }
 
