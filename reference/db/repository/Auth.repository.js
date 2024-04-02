@@ -17,7 +17,7 @@ class AuthRepository {
   }
 
   async getByEmail(email) {
-    const userData = await this.knex.select("name", "lastname", "role", "password_hash", "id", "deleted_at").from(TABLES.USERS).where({ email: email });
+    const userData = await this.knex.select("id", "name", "lastname", "role", "password_hash", "deleted_at").from(TABLES.USERS).where({ email: email });
     return userData[0];
   }
 }

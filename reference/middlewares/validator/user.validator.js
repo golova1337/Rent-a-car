@@ -1,5 +1,5 @@
 const { body, param, validationResult } = require("express-validator");
-const authorService = require("../../db/repository/Auth.repository");
+const authService = require("../../db/repository/Auth.repository");
 
 const userValidator = {
   singUP: [
@@ -11,7 +11,7 @@ const userValidator = {
       .isLength({ min: 4, max: 52 })
       .isEmail()
       .custom(async (value) => {
-        const user = await authorService.getByEmail(value);
+        const user = await authService.getByEmail(value);
         if (user) {
           throw new Error("BadRequest");
         }
@@ -26,7 +26,7 @@ const userValidator = {
       .isLength({ min: 4, max: 52 })
       .isEmail()
       .custom(async (value, { req }) => {
-        const user = await authorService.getByEmail(value);
+        const user = await authService.getByEmail(value);
         if (!user) {
           throw new Error("NotFound");
         } else if (user.deleted_at) {

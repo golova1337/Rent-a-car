@@ -2,14 +2,13 @@ require("dotenv").config();
 const CarRepository = require("../db/repository/Car.repository");
 const createError = require("http-errors");
 const obj = require("../utils/obj");
-const pagination = require("../utils/pagination");
+const paginationCal = require("../utils/paginationCal");
 
 class CarService {
   async insert(body) {
     // repository
     await CarRepository.insert(body);
     return {
-      message: "create successfull",
       data: body,
       meta: {},
     };
@@ -18,7 +17,6 @@ class CarService {
   async delete(id) {
     await CarRepository.delete(id);
     return {
-      message: "deletion successfull",
       data: {
         id: id,
       },
@@ -26,83 +24,72 @@ class CarService {
     };
   }
 
-  async lease(page, perPage) {
+  async lease(conditions) {
+    let { page, perPage } = conditions;
+    page = parseInt(page, 10) || 1;
+    perPage = parseInt(perPage, 10) || 10;
+
+    // viriable for repository
+    let data;
+    let count;
+
     // repository
-    let result = await CarRepository.lease();
+    [data, count] = await CarRepository.lease({ page, perPage });
 
     // pagination
-    const { paginatedResult, totalPages } = pagination(page, perPage, result);
+    const pagination = paginationCal({ data, page, perPage, count });
 
-    return {
-      message: "Get successful",
-      meta: {
-        current_page: page,
-        per_page: perPage,
-        total_items: result.length,
-        total_pages: totalPages,
-        prev_page: page > 1 ? page - 1 : null,
-        next_page: page < totalPages ? page + 1 : null,
-      },
-      data: {
-        result: paginatedResult,
-      },
-    };
+    return pagination;
   }
 
-  async get(filters, page, perPage) {
+  async get(conditions) {
+    let { page, perPage, ...filters } = conditions;
+
     // check  there are filters
-    const data = obj.notEmpty(filters);
-    let result;
+    filters = obj.notEmpty(filters);
+    page = parseInt(page, 10) || 1;
+    perPage = parseInt(perPage, 10) || 10;
+
+    // veriable for repository
+    let data;
+    let count;
 
     // repository
-    if (!Object.keys(data).length) {
-      result = await CarRepository.get({ status: "not_in_rent" });
+    if (!Object.keys(filters).length) {
+      [data, count] = await CarRepository.get({ page, perPage }, { status: "not_in_rent" });
     } else {
-      result = await CarRepository.get({ ...data, status: "not_in_rent" });
+      [data, count] = await CarRepository.get({ page, perPage }, { ...filters, status: "not_in_rent" });
     }
-    const { paginatedResult, totalPages } = pagination(page, perPage, result);
 
-    return {
-      message: "Get successful",
-      meta: {
-        current_page: page,
-        per_page: perPage,
-        total_items: result.length,
-        total_pages: totalPages,
-        prev_page: page > 1 ? page - 1 : null,
-        next_page: page < totalPages ? page + 1 : null,
-      },
-      data: {
-        result: paginatedResult,
-      },
-    };
+    // calcuate pagination
+    const pagination = paginationCal({ data, page, perPage, count });
+
+    return pagination;
   }
 
-  async search(substring, page, perPage) {
-    const data = obj.notEmpty(substring);
-    let result;
-    if (!Object.keys(data).length) {
-      result = await CarRepository.get({ status: "not_in_rent" });
+  async search(conditions) {
+    let { page, perPage, ...substring } = conditions;
+
+    // check substrings
+    substring = obj.notEmpty(substring);
+    page = parseInt(page, 10) || 1;
+    perPage = parseInt(perPage, 10) || 10;
+
+    // veriable for repository
+    let data;
+    let count;
+
+    // Calling a function depending on the conditions
+    if (!Object.keys(substring).length) {
+      [data, count] = await CarRepository.get({ page, perPage }, { status: "not_in_rent" });
     } else {
-      result = await CarRepository.search(data);
+      [data, count] = await CarRepository.search({ page, perPage }, substring);
     }
 
-    // pagination
-    const { paginatedResult, totalPages } = pagination(page, perPage, result);
-    return {
-      message: "Get successful",
-      meta: {
-        current_page: page,
-        per_page: perPage,
-        total_items: result.length,
-        total_pages: totalPages,
-        prev_page: page > 1 ? page - 1 : null,
-        next_page: page < totalPages ? page + 1 : null,
-      },
-      data: {
-        result: paginatedResult,
-      },
-    };
+    // calcuate pagination
+    const pagination = paginationCal({ data, page, perPage, count });
+
+    return pagination;
   }
 
   async rent(body) {
@@ -115,7 +102,6 @@ class CarService {
       // create new lease
       const idNewLease = await CarRepository.rent(body);
       return {
-        message: "The lease is successful",
         data: {
           id: idNewLease,
           start: body.start_time,
@@ -127,16 +113,15 @@ class CarService {
   }
 
   async reclaim(id) {
-    // create end of lease
-    const end = new Date();
     // Is there a lease
     const resultCheck = await CarRepository.checkLeaseExist(id);
     if (!resultCheck.length) {
       throw createError(404, "Not found");
+    } else if (resultCheck[0].status === "inactive") {
+      throw createError(400, "The lease is inactive");
     }
-    const result = await CarRepository.reclaim({ id, end, carId: resultCheck[0].car_id });
+    const result = await CarRepository.reclaim({ id, carId: resultCheck[0].car_id });
     return {
-      message: "Reclaim successful",
       data: {
         result,
       },

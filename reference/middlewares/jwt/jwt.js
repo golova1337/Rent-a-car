@@ -1,4 +1,4 @@
-const authHelpers = require("../../helpers/Auth.helpers");
+const AuthHelpers = require("../../helpers/Auth.helpers");
 const createError = require("http-errors");
 
 class Jwt {
@@ -9,7 +9,7 @@ class Jwt {
         throw createError(401, "Unauthorized");
       }
       const authToken = req.headers.authorization.split(" ")[1];
-      const decoded = authHelpers.verifyJwt(authToken);
+      const decoded = AuthHelpers.verifyJwt(authToken);
       req.user = decoded;
       next();
     } catch (error) {
@@ -25,7 +25,7 @@ class Jwt {
       if (roles.includes(req.user.role)) {
         next();
       } else {
-        return res.status(403).json({ message: "Forbidden" });
+        return res.status(403).json({ error: "Forbidden" });
       }
     };
   }

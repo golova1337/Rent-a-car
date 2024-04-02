@@ -5,7 +5,7 @@ const { carValidator } = require("../middlewares/validator/car.validator");
 const CarsController = require("../controllers/Cars.controller");
 
 // Можливість бачити які автівки зараз доступні для прокату - користувач і адмін. // обєднаті з фільтрацєю
-cars.get("/", Jwt.check, Jwt.Role(["user", "admin"]), CarsController.get);
+cars.get("/", Jwt.check, Jwt.Role(["user", "admin", "superadmin"]), CarsController.get);
 
 // Створення автівок - тільки адміном
 cars.post("/", Jwt.check, Jwt.Role(["admin", "superadmin"]), carValidator.validationResult, CarsController.create);

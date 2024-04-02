@@ -1,9 +1,9 @@
 class Responses {
-  successResponse({ message, data, meta = {} }) {
+  successResponse({ message, data, meta }) {
     return {
       status: true,
       message,
-      meta,
+      total: meta,
       error: null,
       data,
     };

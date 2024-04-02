@@ -1,89 +1,60 @@
 require("dotenv").config();
 const createError = require("http-errors");
 const UserRepository = require("../db/repository/User.repository");
-const authHelpers = require("../helpers/Auth.helpers");
-const pagination = require("../utils/pagination");
+const AuthHelpers = require("../helpers/Auth.helpers");
+const paginationCal = require("../utils/paginationCal");
 
 class UserService {
   async singUp(body) {
     const password = body.password;
 
     // helpers
-    const hash = await authHelpers.hash(password);
+    const hash = await AuthHelpers.hash(password);
 
     // repository
     await UserRepository.insert({ ...body, hash: hash });
 
-    // Link to login
-    const link = new URL(`http://localhost${process.env.PORT}/api/v1/auth/login`);
-
+    // return
     return {
-      message: "Registration successful",
       data: {
         email: body.email,
         name: body.name,
       },
-      meta: {
-        link: link,
-      },
+      meta: {},
     };
   }
 
   async delete(id) {
-    const date = new Date();
-
     // repository
-    await UserRepository.delete(id, date);
+    const result = await UserRepository.delete(id);
 
-    // Link to check if the user exists
-    const link = new URL(`http://localhost:${process.env.PORT}/api/v1/users/${id}`);
+    // return
     return {
-      message: "Deletion successful",
       data: {
         id: id,
-        deleted_at: date,
       },
-      meta: {
-        link: link,
-      },
+      meta: {},
     };
   }
 
-  async getAll(data) {
-    const { role, page, perPage } = data;
+  async getAll(conditions) {
+    let { role, page, perPage } = conditions;
+    page = parseInt(page, 10) || 1;
+    perPage = parseInt(perPage, 10) || 10;
 
-    let result;
-
+    // veriable for reposytory
+    let data;
+    let count;
     // if there is ot role. We make the role = user. repository
     if (!role || !role.trim().length) {
-      result = await UserRepository.getAll("user");
+      [data, count] = await UserRepository.getAll({ page, perPage }, "user");
     } else {
-      result = await UserRepository.getAll(role);
+      [data, count] = await UserRepository.getAll({ page, perPage }, role);
     }
+    // run Calculation pagination
+    const pagination = paginationCal({ data, page, perPage, count: count[0].count });
 
-    // result pagination
-    const { paginatedResult, totalPages } = pagination(page, perPage, result);
-
-    // create link next page and prev page
-    const linkNext = new URL(`http://localhost:${process.env.PORT}/api/v1/users?page=${page < totalPages ? page + 1 : null}&perPage=${perPage}`);
-    const linkPrev = new URL(`http://localhost:${process.env.PORT}/api/v1/users?page=${page > 1 ? page - 1 : null}&perPage=${perPage}`);
-
-    return {
-      message: "Get successful",
-      meta: {
-        current_page: page,
-        per_page: perPage,
-        total_items: result.length,
-        total_pages: totalPages,
-        prev_page: page > 1 ? page - 1 : null,
-        next_page: page < totalPages ? page + 1 : null,
-        link_next: linkNext,
-        link_prev: linkPrev,
-      },
-      data: {
-        result: paginatedResult,
-      },
-    };
+    return pagination;
   }
 
   async getOne(id) {
@@ -93,7 +64,6 @@ class UserService {
       throw createError(404, "User with this id dont exist");
     }
     return {
-      message: "getOne successful",
       data: result,
       meta: {},
     };

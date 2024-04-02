@@ -7,7 +7,7 @@ class UserRepository {
   }
 
   async insert(body) {
-    const result = await this.knex(TABLES.USERS).returning("create_at").insert({
+    const result = await this.knex(TABLES.USERS).insert({
       name: body.name,
       lastname: body.lastname,
       email: body.email,
@@ -17,18 +17,30 @@ class UserRepository {
     return result;
   }
 
-  async delete(id, date) {
-    await this.knex(TABLES.USERS).where({ id: id }).update({
-      deleted_at: date,
-    });
+  async delete(id) {
+    return this.knex(TABLES.USERS)
+      .where({ id: id })
+      .update({
+        deleted_at: this.knex.fn.now(6),
+      });
   }
 
-  async getAll(role) {
-    const result = await this.knex.select("id", "name", "lastname", "email", "role").from(TABLES.USERS).where({
-      role: role,
-      deleted_at: null,
-    });
-    return result;
+  async getAll(pagination, role) {
+    const [data, count] = await Promise.all([
+      this.knex
+        .select("id", "name", "lastname", "email", "role")
+        .from(TABLES.USERS)
+        .limit(pagination.perPage)
+        .offset((pagination.page - 1) * pagination.perPage)
+        .where({
+          role: role,
+          deleted_at: null,
+        }),
+      this.knex.from(TABLES.USERS).count("role as count ").where({
+        role: role,
+      }),
+    ]);
+    return [data, count];
   }
 
   async getOne(id) {

@@ -21,5 +21,8 @@ module.exports = {
       tableName: "knex_migrations",
       directory: "./reference/db/migrations", // Директория для хранения файлов миграций
     },
+    seeds: {
+      directory: "./reference/db/seed",
+    },
   },
 };

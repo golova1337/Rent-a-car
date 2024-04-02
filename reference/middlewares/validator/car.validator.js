@@ -21,15 +21,16 @@ const carValidator = {
   idParam: [param("id").trim().notEmpty().isInt()],
 
   date: [
-    body("start_time").exists().withMessage("Start date is required"),
+    body("start_time")
+      .exists()
+      .withMessage("Start date is required")
+      .custom((value) => new Date(value) >= new Date()),
     body("end_time").exists().withMessage("End date is required"),
-    body("end_time")
-      .custom((value, { req }) => {
-        const start = new Date(req.body.start_time);
-        const end = new Date(value);
-        return end > start;
-      })
-      .withMessage("End date must be greater than or equal to start date"),
+    body("end_time").custom((value, { req }) => {
+      const start = new Date(req.body.start_time);
+      const end = new Date(value);
+      return end > start && end > new Date();
+    }),
   ],
 
   validationResult: (req, res, next) => {

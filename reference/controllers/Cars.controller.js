@@ -3,78 +3,389 @@ const Response = require("../utils/response");
 
 /**
  * @swagger
- * /cars/creation-car:
- *   post:
- *     summary: "Create new auto (Admin only)"
- *     tags:
- *       - car
- *     security:
- *       - JWT: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: "#/components/schemas/RequestObjectCreateAuto"
- *     responses:
- *       '201':
- *         description: "Auto created successfully"
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/ResponseObjectCreateAuto"
- *       '401':
- *         description: "Verification was unsuccessful"
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/UnauthorizedError"
+ * components:
+ *   schemas:
+ *     GetAllCars:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Getting all cars successful"
+ *         total:
+ *           type: object
+ *           properties:
+ *             per_page:
+ *               type: integer
+ *               example: 5
+ *             current_page:
+ *               type: integer
+ *               example: 1
+ *             last_page:
+ *               type: integer
+ *               example: 1
+ *             from:
+ *               type: integer
+ *               example: 1
+ *             to:
+ *               type: integer
+ *               example: 1
+ *         error:
+ *           type: null
+ *         data:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 2
+ *               brand:
+ *                 type: string
+ *                 example: "Toyota"
+ *               model:
+ *                 type: string
+ *                 example: "Corolla"
+ *               year:
+ *                 type: integer
+ *                 example: 2022
+ *               number_plate:
+ *                 type: string
+ *                 example: "BX2234"
+ *               price:
+ *                 type: integer
+ *                 example: 1500
+ *               status:
+ *                 type: string
+ *                 description: "Status of the car."
+ *                 example: "not_in_rent"
+ *
+ *     CarCreateRequest:
+ *       type: object
+ *       properties:
+ *         brand:
+ *           type: string
+ *           description: "Brand of the car."
+ *           example: "BMW"
+ *         model:
+ *           type: string
+ *           description: "Model of the car."
+ *           example: "m5"
+ *         year:
+ *           type: integer
+ *           description: "Year of the car."
+ *           example: 2020
+ *         number_plate:
+ *           type: string
+ *           description: "License plate number of the car."
+ *           example: "AX1337"
+ *         price:
+ *           type: integer
+ *           description: "Price of the car."
+ *           example: 1700
+ *
+ *     CarCreationResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "create successfull"
+ *         total:
+ *           type: object
+ *           example: {}
+ *         error:
+ *           type: null
+ *         data:
+ *           type: object
+ *           properties:
+ *             brand:
+ *               type: string
+ *               example: "BMW"
+ *             model:
+ *               type: string
+ *               example: "m5"
+ *             year:
+ *               type: integer
+ *               example: 2020
+ *             number_plate:
+ *               type: string
+ *               example: "AX1337"
+ *             price:
+ *               type: integer
+ *               example: 1700
+ *
+ *     DeletionResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Deletion successful"
+ *         total:
+ *           type: object
+ *           example: {}
+ *         error:
+ *           type: null
+ *         data:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: string
+ *               example: "4"
+ *
+ *     LeaseReceiptResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Receipt of leased vehicles successfully"
+ *         total:
+ *           type: object
+ *           properties:
+ *             per_page:
+ *               type: integer
+ *               example: 5
+ *             current_page:
+ *               type: integer
+ *               example: 1
+ *             last_page:
+ *               type: integer
+ *               example: 1
+ *             from:
+ *               type: integer
+ *               example: 1
+ *             to:
+ *               type: integer
+ *               example: 1
+ *         error:
+ *           type: null
+ *         data:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 5
+ *               brand:
+ *                 type: string
+ *                 example: "Honda"
+ *               model:
+ *                 type: string
+ *                 example: "Civic"
+ *               year:
+ *                 type: integer
+ *                 example: 2019
+ *               number_plate:
+ *                 type: string
+ *                 example: "EX5678"
+ *               price:
+ *                 type: integer
+ *                 example: 1400
+ *               status:
+ *                 type: string
+ *                 example: "in_rent"
+ *
+ *     SearchResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Searching successfull"
+ *         total:
+ *           type: object
+ *           properties:
+ *             per_page:
+ *               type: integer
+ *               example: 10
+ *             current_page:
+ *               type: integer
+ *               example: 1
+ *             last_page:
+ *               type: integer
+ *               example: 1
+ *             from:
+ *               type: integer
+ *               example: 1
+ *             to:
+ *               type: integer
+ *               example: 2
+ *         error:
+ *           type: null
+ *         data:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               id:
+ *                 type: integer
+ *                 example: 3
+ *               brand:
+ *                 type: string
+ *                 example: "Mercedes-Benz"
+ *               model:
+ *                 type: string
+ *                 example: "E-Class"
+ *               year:
+ *                 type: integer
+ *                 example: 2015
+ *               number_plate:
+ *                 type: string
+ *                 example: "CX3456"
+ *               price:
+ *                 type: integer
+ *                 example: 1800
+ *               status:
+ *                 type: string
+ *                 example: "not_in_rent"
+ *
+ *     LeaseResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "The lease is successful"
+ *         total:
+ *           type: object
+ *           properties:
+ *             meta:
+ *               type: object
+ *         error:
+ *           type: null
+ *         data:
+ *           type: object
+ *           properties:
+ *             id:
+ *               type: integer
+ *               example: 4
+ *             start:
+ *               type: string
+ *               format: date-time
+ *               example: "2025-07-10T10:30:00"
+ *             end:
+ *               type: string
+ *               format: date-time
+ *               example: "2025-08-11T10:30:00"
+ *
+ *     ReclaimResponse:
+ *       type: object
+ *       properties:
+ *         status:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Reclaim successful"
+ *         total:
+ *           type: object
+ *           properties:
+ *             meta:
+ *               type: object
+ *         error:
+ *           type: null
+ *         data:
+ *           type: object
+ *     UnauthorizedError:
+ *       type: object
+ *       properties:
+ *         error:
+ *           type: string
+ *           example: "Unauthorized"
  */
-// создания авто с занесением его в таблицу cars доступно только админу
 class CarsController {
   /**
    * @swagger
-   * /:
+   * /api/v1/cars:
    *   get:
    *     summary: "Get all cars"
+   *     description: If there's no filtering, you get all the cars
    *     tags:
    *       - car
    *     security:
-   *       - JWT: []
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: brand
+   *         schema:
+   *           type: string
+   *         example: Toyota
+   *       - in: query
+   *         name: model
+   *         schema:
+   *           type: string
+   *         example: Corolla
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         example: 1
+   *       - in: query
+   *         name: perPage
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 100
+   *         example: 10
    *     responses:
    *       '200':
-   *         description: "Get all cars"
+   *         description: "Successful operation"
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/RequestObjectCreateAuto"
+   *               type: array
+   *               items:
+   *                 $ref: "#/components/schemas/GetAllCars"
    *       '401':
-   *         description: "Verification was unsuccessful"
+   *         description: "No jwt token"
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
-   *       '500':
-   *         description: "Filtering unsuccessful"
+   *               $ref: "#/components/errors/UnauthorizedError"
+   *       '403':
+   *         description: "verefication was unsuccessful"
    *         content:
    *           application/json:
-   *             examples:
-   *               example1:
-   *                 summary: "Internal Server Error"
-   *                 value:
-   *                   message:'Internal Server Error'
+   *             schema:
+   *               $ref: "#/components/errors/Forbidden"
+   *       '500':
+   *         description: "Internal Server Error"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/ServerError"
    */
+
   // Можливість бачити які автівки зараз доступні для прокату - користувач і адмін.
   async get(req, res, next) {
     // data for run the service
-    const filters = req.query;
-    const page = parseInt(req.query.page, 10) || 1;
-    const perPage = parseInt(req.query.perPage, 10) || 10;
+    const query = req.query;
     try {
       // the service
-      const { message, data, meta } = await CarService.get(filters, page, perPage);
+      const result = await CarService.get(query);
+
+      // create response
+      const { data, ...meta } = result;
+      const response = Response.successResponse({ message: "Getting all cars successful ", data, meta });
+
       // response
-      return res.status(200).json(Response.successResponse({ message, data, meta }));
+      return res.status(200).json(response);
     } catch (error) {
       if (error.status) {
         res.status(error.status).json(Response.errorResponse(error));
@@ -83,16 +394,67 @@ class CarsController {
       }
     }
   }
+
+  /**
+   * @swagger
+   * /api/v1/cars:
+   *   post:
+   *     summary: "Create new auto - admin, superadmin"
+   *     tags:
+   *       - car
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: "#/components/schemas/CarCreateRequest"
+   *     responses:
+   *       '201':
+   *         description: "Auto created successfully"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/schemas/CarCreationResponse"
+   *       '401':
+   *         description: "No jwt token"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/UnauthorizedError"
+   *       '403':
+   *         description: "verefication was unsuccessful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/Forbidden"
+   *       '500':
+   *         description: server error.
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/ServerError"
+   */
+  // создания авто с занесением его в таблицу cars доступно только админу
 
   async create(req, res, next) {
     // data for run the srvice
     const body = req.body;
     try {
       // the service
-      const { message, data, meta } = await CarService.insert(body);
+      const result = await CarService.insert(body);
+
+      // create response
+      const { data, meta } = result;
+      const response = Response.successResponse({
+        message: "create successfull",
+        data,
+        meta,
+      });
 
       // response
-      return res.status(201).json(Response.successResponse({ message, data, meta }));
+      return res.status(201).json(response);
     } catch (error) {
       if (error.status) {
         res.status(error.status).json(Response.errorResponse(error));
@@ -104,53 +466,65 @@ class CarsController {
 
   /**
    * @swagger
-   * /cars/:id:
+   * /api/v1/cars/{carId}:
    *   delete:
-   *     summary: "Admin can soft delete a car"
-   *     description: "When the car is deleted, it remains in the table."
+   *     summary: "Admin, superadmin can soft delete a car"
+   *     description: "When the car is deleted, it remains in the table. (soft deletion)"
    *     tags:
    *       - car
    *     parameters:
-   *       - $ref: "#/components/parameters/DeleteCar"
+   *       - name: carId
+   *         in: path
+   *         description: "Identifier car"
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           format: int64
+   *         example: 4
    *     security:
-   *       - JWT: []
+   *       - bearerAuth: []
    *     responses:
    *       '200':
    *         description: "Car was deleted"
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 car:
-   *                   type: object
-   *       '400':
-   *         description: "Bad request"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 message:
-   *                   type: string
-   *                   example: "Enter the machine number"
+   *               $ref: "#/components/schemas/DeletionResponse"
    *       '401':
-   *         description: "Verification was unsuccessful"
+   *         description: "No jwt token"
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
+   *               $ref: "#/components/errors/UnauthorizedError"
+   *       '403':
+   *         description: "verefication was unsuccessful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/Forbidden"
+   *       '500':
+   *         description: "Server error."
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/ServerError"
    */
+
   // удаление авто с таблицы cars доступно только админу
   async delete(req, res, next) {
     // data for run the srvice
     const id = req.params.id;
     try {
       // the service
-      const { message, data, meta } = await CarService.delete(id);
+      const result = await CarService.delete(id);
+
+      // create response
+      const { data, meta } = result;
+      const response = Response.successResponse({ message: "Deletion successful", data, meta });
 
       // response
-      return res.status(200).json(Response.successResponse({ message, data, meta }));
+      return res.status(200).json(response);
     } catch (error) {
       if (error.status) {
         res.status(error.status).json(Response.errorResponse(error));
@@ -162,43 +536,67 @@ class CarsController {
 
   /**
    * @swagger
-   * /cars/lease:
+   * /api/v1/cars/lease:
    *   get:
    *     summary: "Admin can view the list of cars currently in rental"
    *     tags:
    *       - car
    *     security:
-   *       - JWT: []
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: query
+   *         name: page
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *         example: 1
+   *       - in: query
+   *         name: perPage
+   *         schema:
+   *           type: integer
+   *           minimum: 1
+   *           maximum: 100
+   *         example: 5
    *     responses:
    *       '200':
    *         description: "Admin retrieves a list of all cars currently in rental"
    *         content:
    *           application/json:
    *             schema:
-   *               type: object
-   *               properties:
-   *                 auto:
-   *                   type: array
-   *                   items:
-   *                     $ref: "#/components/schemas/RequestObjectCreateAuto"
+   *               $ref: "#/components/schemas/LeaseReceiptResponse"
    *       '401':
-   *         description: "Verification was unsuccessful"
+   *         description: "No jwt token"
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
+   *               $ref: "#/components/errors/UnauthorizedError"
+   *       '403':
+   *         description: "verefication was unsuccessful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/Forbidden"
+   *       '500':
+   *         description: "Server error."
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/ServerError"
    */
   // Можливість бачити які автівки зараз в прокату -  адмін
   async lease(req, res, next) {
     // data for run the service
-    const page = parseInt(req.query.page, 10) || 1;
-    const perPage = parseInt(req.query.perPage, 10) || 10;
+    const query = req.query;
     try {
       // the service
-      const { message, data, meta } = await CarService.lease(page, perPage);
+      const result = await CarService.lease(query);
+
+      // create response
+      const { data, ...meta } = result;
+      const response = Response.successResponse({ message: "Receipt of leased vehicles successfully", data, meta });
 
       // response
-      return res.status(200).json(Response.successResponse({ message, data, meta }));
+      return res.status(200).json(response);
     } catch (error) {
       if (error.status) {
         res.status(error.status).json(Response.errorResponse(error));
@@ -210,69 +608,65 @@ class CarsController {
 
   /**
    * @swagger
-   * /cars/search:
+   * api/v1/cars/search:
    *   get:
    *     summary: "Substring"
-   *     description: "The user has the ability to perform a quick search by the name and brand. For example, if the user enters 'su,' it should return all cars where the name or brand contains such a substring (Subaru, Suzuki, Toyota Suburban, etc.), excluding those currently in rental."
+   *     description: "Search by substring"
    *     tags:
    *       - car
    *     parameters:
-   *       - $ref: "#/components/parameters/FilterCarBrand"
-   *       - $ref: "#/components/parameters/FilterCarbrandModel"
+   *       - in: query
+   *         name: brand
+   *         schema:
+   *           type: string
+   *         example: er
+   *       - in: query
+   *         name: model
+   *         schema:
+   *           type: string
+   *         example: ass
    *     security:
-   *       - JWT: []
+   *       - bearerAuth: []
    *     responses:
    *       '200':
    *         description: "Search successful"
    *         content:
    *           application/json:
    *             schema:
-   *               oneOf:
-   *                 - type: object
-   *                   properties:
-   *                     auto:
-   *                       type: array
-   *                       items:
-   *                         $ref: "#/components/schemas/RequestObjectCreateAuto"
-   *       '400':
-   *         description: "Filtering unsuccessful"
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 error:
-   *                   type: string
-   *               example:
-   *                 error: "Enter some data"
+   *               $ref: "#/components/schemas/SearchResponse"
    *       '401':
-   *         description: "Verification was unsuccessful"
+   *         description: "No jwt token"
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
+   *               $ref: "#/components/errors/UnauthorizedError"
+   *       '403':
+   *         description: "verefication was unsuccessful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/Forbidden"
    *       '500':
    *         description: "Filtering unsuccessful"
    *         content:
    *           application/json:
-   *             examples:
-   *               example1:
-   *                 summary: "Internal Server Error"
-   *                 value:
-   *                   message:'Internal Server Error'
+   *             schema:
+   *               $ref: "#/components/errors/ServerError"
    */
   // Користувач повинен мати можливість швидкого пошуку по назві і марці авто.
   async search(req, res, next) {
     // data for run the service
-    const substring = req.query;
-    const page = parseInt(req.query.page, 10) || 1;
-    const perPage = parseInt(req.query.perPage, 10) || 10;
+    const query = req.query;
     try {
       // the service
-      const { message, data, meta } = await CarService.search(substring, page, perPage);
+      const result = await CarService.search(query);
+
+      // create response
+      const { data, ...meta } = result;
+      const response = Response.successResponse({ message: "Searching successfull", data, meta });
 
       // response
-      return res.status(200).json(Response.successResponse({ message, data, meta }));
+      return res.status(200).json(response);
     } catch (error) {
       if (error.status) {
         res.status(error.status).json(Response.errorResponse(error));
@@ -284,61 +678,73 @@ class CarsController {
 
   /**
    * @swagger
-   * /cars/lease:
+   * /api/v1/cars/lease:
    *   post:
-   *     summary: "The user can lease a car."
+   *     summary: "The user or admin can lease a car."
    *     description: "The user can only have one car on lease at a time. If the car is already rented, the user cannot lease another car."
    *     tags:
    *       - car
    *     security:
-   *       - JWT: []
+   *       - bearerAuth: []
    *     requestBody:
    *       required: true
    *       content:
    *         application/json:
    *           schema:
    *             properties:
-   *               user_id:
-   *                 type: int
-   *                 example: 2
    *               car_id:
-   *                 type: int
-   *                 example: 1
+   *                 type: integer
+   *                 example: 2
    *               start_time:
    *                 type: string
    *                 format: date-time
-   *                 example: 2024-07-10T10:30:00
+   *                 example: "2025-07-10T10:30:00"
    *               end_time:
    *                 type: string
    *                 format: date-time
-   *                 example: 2024-08-11T10:30:00
+   *                 example: "2025-08-11T10:30:00"
    *     responses:
    *       '200':
    *         description: "Rental successful"
    *         content:
    *           application/json:
-   *             example:
-   *                message: "You have rented successfully."
-   *                leaseId: 21
+   *             schema:
+   *               $ref: "#/components/schemas/LeaseResponse"
    *       '400':
    *         description: "Bad Request, invalid data or email is wrong."
    *         content:
    *           application/json:
    *             examples:
    *               example1:
-   *                 summary: Invalid data_1
+   *                 summary: "You rents a car"
    *                 value:
-   *                   error: "you are renting"
+   *                   status: false
+   *                   message: "You rents a car"
+   *                   data: null
+   *                   error:
+   *                     message: "You rents a car"
    *               example2:
-   *                 summary: Invalid data_2
+   *                 summary: "Invalid data"
    *                 value:
-   *                   message: "The start of the lease cannot be after the end of the lease."
+   *                   "Invalid value": "car_id"
    *       '401':
-   *         description: "Verification was unsuccessful"
+   *         description: "No jwt token"
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
+   *               $ref: "#/components/errors/UnauthorizedError"
+   *       '403':
+   *         description: "verefication was unsuccessful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/Forbidden"
+   *       '500':
+   *         description: "Server error."
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/ServerError"
    */
 
   // аренда машин
@@ -348,10 +754,14 @@ class CarsController {
     const user_id = req.user.id;
     try {
       // the service
-      const { message, data, meta } = await CarService.rent({ ...body, user_id });
+      const result = await CarService.rent({ ...body, user_id });
+
+      // create response
+      const { data, ...meta } = result;
+      const response = Response.successResponse({ message: "The lease is successful", data, meta });
 
       // response
-      return res.status(200).json(Response.successResponse({ message, data, meta }));
+      return res.status(200).json(response);
     } catch (error) {
       if (error.status) {
         res.status(error.status).json(Response.errorResponse(error));
@@ -361,62 +771,74 @@ class CarsController {
     }
   }
 
+  // возврат авто с аренды только админ может делать
   /**
    * @swagger
-   * /cars/reclaim
+   * /api/v1/cars/reclaim/{leaseId}:
    *   put:
-   *     summary: "Only an admin can process the return of the car."
-   *     description: "When a car is returned, update the data in the table regarding its status, indicating whether it is in rental or not. The lease information, along with the actual time finished, is moved to another table, 'Archive_lease,' and is removed from the 'Rentals' table"
+   *     summary: "The admin or super admin returns the rent"
    *     tags:
    *       - car
    *     security:
-   *       - JWT: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             properties:
-   *               leaseId:
-   *                 type: int
-   *                 example: 2
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: leaseId
+   *         required: true
+   *         schema:
+   *           type: integer
+   *           minimum: 1
    *     responses:
    *       '200':
-   *         description: "A Return successfully"
+   *         description: "Admin retrieves a list of all cars currently in rental"
    *         content:
    *           application/json:
-   *             example:
-   *               message: 'The car has been returned'
+   *             schema:
+   *               $ref: "#/components/schemas/ReclaimResponse"
    *       '400':
-   *         description: "Bad Request, invalid data or email is wrong."
+   *         description: "The lease is inactive"
    *         content:
    *           application/json:
    *             examples:
    *               example1:
-   *                 summary: Invalid data_1
+   *                 summary: "The lease is inactive"
    *                 value:
-   *                   error: "Failed to return car: No rental found for this car number"
-   *               example2:
-   *                 summary: Invalid data_2
-   *                 value:
-   *                   error: "Enter the lease id"
+   *                   status: false
+   *                   message: "The lease is inactive"
+   *                   data: null
+   *                   error:
+   *                     message: "The lease is inactive"
    *       '401':
-   *         description: "Verification was unsuccessful"
+   *         description: "No jwt token"
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: "#/components/schemas/UnauthorizedError"
+   *               $ref: "#/components/errors/UnauthorizedError"
+   *       '403':
+   *         description: "verefication was unsuccessful"
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/Forbidden"
+   *       '500':
+   *         description: "Server error."
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: "#/components/errors/ServerError"
    */
-
-  // возврат авто с аренды только админ может делать
   async reclaim(req, res, next) {
     const id = req.params.id;
     try {
       // the service
-      const { message, data, meta } = await CarService.reclaim(id);
+      const result = await CarService.reclaim(id);
+
+      // create response
+      const { data, ...meta } = result;
+      const response = Response.successResponse({ message: "Reclaim successful", data, meta });
 
       // response
-      return res.status(200).json(Response.successResponse({ message, data, meta }));
+      return res.status(200).json(response);
     } catch (error) {
       if (error.status) {
         res.status(error.status).json(Response.errorResponse(error));
