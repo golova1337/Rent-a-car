@@ -1,25 +1,24 @@
 require("dotenv").config();
-const { knex } = require("./db/createConnection");
+const { knex } = require("./reference/db/config/connection.js");
+const error500Middleware = require("./reference/middlewares/errors/error500.js");
 
 const express = require("express");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const options = require("./api/apiDoc");
+const options = require("./reference/openApi/openApiDocument.js");
 const app = express();
-const router = require("./routerAutho/routerSignUp");
-const car = require("./routerCar/routerCar");
+const authRouter = require("./reference/routers/auth.router.js");
+const usersRouter = require("./reference/routers/users.router.js");
+const carsRouter = require("./reference/routers/cars.router.js");
 
 const Port = 5500;
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.db = knex;
-  next();
-});
-
-app.use("/", router);
-app.use("/car", car);
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/cars", carsRouter);
+app.use(error500Middleware);
 
 process.on("SIGINT", async () => {
   try {
